@@ -26,15 +26,20 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_spic
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
 workflow BIONF_SPICE_NF {
-
-  
+    take:
+        species       // String: Ensembl species name
+        release       // Integer: Ensembl release version
+        anno_tools    // Path: Path to annotation tools file
+        
     main:
 
     //
     // WORKFLOW: Run pipeline
     //
-    SPICE-NF (
-        samplesheet
+    SPICE_NF (
+        species,       // String: Ensembl species name
+        release,       // Integer: Ensembl release version
+        anno_tools    // Path: Path to annotation tools file
     )
 }
 /*
@@ -65,7 +70,6 @@ workflow {
     // WORKFLOW: Run main workflow
     //
     BIONF_SPICE_NF (
-        PIPELINE_INITIALISATION.out.samplesheet
         params.species,
         params.release,
         params.anno_tools

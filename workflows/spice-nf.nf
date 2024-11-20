@@ -19,7 +19,10 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_spic
 workflow SPICE_NF {
 
     take:
-    ch_samplesheet // channel: samplesheet read in from --input
+        species       // String: Ensembl species name
+        release       // Integer: Ensembl release version
+        anno_tools    // Path: Path to annotation tools file
+        
     main:
 
     ch_versions = Channel.empty()
