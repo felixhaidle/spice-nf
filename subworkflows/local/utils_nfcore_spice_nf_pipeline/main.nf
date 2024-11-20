@@ -37,8 +37,6 @@ workflow PIPELINE_INITIALISATION {
     anno_tools    // string: path to FAS anno tools
 
     main:
-    
-    log.info "Initializing pipeline for species: ${species}, release: ${release}, using annotation tools: ${anno_tools}"
 
     ch_versions = Channel.empty()
 
