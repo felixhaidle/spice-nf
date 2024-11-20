@@ -8,7 +8,7 @@
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_spice-nf_pipeline'
+include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_spice_nf_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -16,7 +16,7 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_spic
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-workflow SPICE-NF {
+workflow SPICE_NF {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input

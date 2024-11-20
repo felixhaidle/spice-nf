@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/BIONF/spice-nf/master/nextflow_schema.json",
     "title": "BIONF/spice-nf pipeline parameters",
-    "description": "Nextflow implementation of the SPLICE algorithm",
+    "description": "Nextflow implementation of the SPICE program",
     "type": "object",
     "$defs": {
         "input_output_options": {
@@ -10,7 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["input", "outdir"],
+            "required": ["outdir", "anno_tools", "species", "release"],
             "properties": {
                 "input": {
                     "type": "string",
@@ -35,6 +35,28 @@
                     "fa_icon": "fas fa-envelope",
                     "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
                     "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
+                },
+                "species": {
+                    "type": "string",
+                    "pattern": "^[a-z_]+$", 
+                    "description": "Species name as available on Ensembl, in lowercase (e.g., 'homo_sapiens', 'mus_musculus').",
+                    "help_text": "Provide the species name in Ensembl format. Must be lowercase with underscores. Example: 'homo_sapiens' for human or 'mus_musculus' for mouse.",
+                    "fa_icon": "fas fa-dna"
+                },
+                "release": {
+                    "type": "integer",
+                    "description": "Ensembl genome release version (e.g., '113').",
+                    "help_text": "Specify the Ensembl release version for the genome (e.g., 113).",
+                    "minimum": 1,
+                    "fa_icon": "fas fa-calendar-alt"
+                },
+                "anno_tools": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "description": "Path to the `annotools.txt` file containing details of annotation tools.",
+                    "help_text": "Specify the path to the file that lists the annotation tools to use. Each line in the file should describe a tool (e.g., ToolName:ToolVersion).",
+                    "fa_icon": "fas fa-file-alt"
                 }
             }
         },

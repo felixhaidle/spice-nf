@@ -32,8 +32,13 @@ workflow PIPELINE_INITIALISATION {
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
     input             //  string: Path to input samplesheet
+    species       // string: Species name (e.g., "human", "mouse")
+    release       // string: Ensembl release (e.g., "GRCh38")
+    anno_tools    // string: path to FAS anno tools
 
     main:
+    
+    log.info "Initializing pipeline for species: ${species}, release: ${release}, using annotation tools: ${anno_tools}"
 
     ch_versions = Channel.empty()
 
