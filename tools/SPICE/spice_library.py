@@ -82,12 +82,12 @@ def check_library_status(gene_assembler: GeneAssembler, library_info: LibraryInf
                             print("Incorrect entries found.")
                             print("Will remove them.")
                         flag = False
-                else:
-                    if transcript.get_id()[6] == "T":
-                        if library_info["status"]["04_incorrect_entry_removing"]:
-                            print("Incorrect entries found.")
-                            print("Will remove them.")
-                        flag = False
+                #else:
+                #    if transcript.get_id()[6] == "T":
+                #        if library_info["status"]["04_incorrect_entry_removing"]:
+                #            print("Incorrect entries found.")
+                #            print("Will remove them.")
+                #        flag = False
         if not flag:
             break
     library_info["status"]["04_incorrect_entry_removing"] = flag
@@ -224,9 +224,9 @@ def remove_incorrect_entries(gene_assembler: GeneAssembler, library_info: Librar
                 if transcript.get_id_taxon() == 9606:
                     if transcript.get_id()[3] == "T" and "NOVEL" not in transcript.get_tags():
                         gene.delete_transcript(transcript.get_id())
-                else:
-                    if transcript.get_id()[6] == "T" and "NOVEL" not in transcript.get_tags():
-                        gene.delete_transcript(transcript.get_id())
+                #else:
+                #    if transcript.get_id()[6] == "T" and "NOVEL" not in transcript.get_tags():
+                #        gene.delete_transcript(transcript.get_id())
     gene_assembler.clear_empty_genes()
     gene_assembler.save_seq(pass_path)
     gene_assembler.save_fas(pass_path)
@@ -294,19 +294,21 @@ def main():
 
     # Set up the args parser.
     argument_parser: ReduxArgParse = ReduxArgParse(["--outdir", "--species", "--release", "--force",
-                                                    "--keepgtf", "--modefas", "--copylib"],
-                                                   [str, str, str, None, None, str, str],
-                                                   ["store", "store", "store", "store_true",
-                                                    "store_true", "store", "store"],
-                                                   [1, 1, 1, None, None, None, None],
-                                                   ["Directory the library will be generated in.",
-                                                    "Species of the library.",
-                                                    "Ensembl release of the library.",
-                                                    "If the specified library already exists, it will be overwritten.",
-                                                    "Keeps the ensembl GTF on the system after library setup.",
-                                                    """Path to a FAS mode file that shall be 
-                                                    used to configure FAS in this library.""",
-                                                    "Path to a library that shall be copied."])
+                                                "--keepgtf", "--modefas", "--copylib", "--test"],
+                                               [str, str, str, None, None, str, str, None],
+                                               ["store", "store", "store", "store_true",
+                                                "store_true", "store", "store", "store_true"],
+                                               [1, 1, 1, None, None, None, None, None],
+                                               ["Directory the library will be generated in.",
+                                                "Species of the library.",
+                                                "Ensembl release of the library.",
+                                                "If the specified library already exists, it will be overwritten.",
+                                                "Keeps the ensembl GTF on the system after library setup.",
+                                                """Path to a FAS mode file that shall be 
+                                                used to configure FAS in this library.""",
+                                                "Path to a library that shall be copied.",
+                                                "Run in test mode using a minimal dataset."])
+
     argument_parser.generate_parser()
     argument_parser.execute()
     argument_dict: Dict[str, Any] = argument_parser.get_args()
@@ -324,11 +326,38 @@ def main():
     ####################################################################
     # LocalEnsembl SETUP.
 
-    # Acquire the local ensembl file.
-    local_ensembl: LocalEnsembl = LocalEnsembl(argument_dict["species"],
-                                               argument_dict["outdir"],
-                                               argument_dict["release"])
+    # Handle TEST Mode: Use minimal test dataset
+    if argument_dict["test"]:
+        print("Running in test mode: downloading and using minimal dataset.")
 
+        # Minimal dataset URLs for testing
+        test_gtf_url = "http://ftp.ensembl.org/pub/release-113/gtf/saccharomyces_cerevisiae/Saccharomyces_cerevisiae.R64-1-1.113.gtf.gz"
+        test_pep_url = "http://ftp.ensembl.org/pub/release-113/fasta/saccharomyces_cerevisiae/pep/Saccharomyces_cerevisiae.R64-1-1.pep.all.fa.gz"
+
+        # Overriding species and release for test
+        argument_dict["species"] = "Saccharomyces cerevisiae"
+        argument_dict["release"] = "113"
+
+        # Initialize LocalEnsembl with test dataset logic
+        local_ensembl: LocalEnsembl = LocalEnsembl(argument_dict["species"],
+                                                   argument_dict["outdir"],
+                                                   argument_dict["release"])
+
+        # Download test GTF and PEP files
+        gtf_path: str = local_ensembl.download(test_url=test_gtf_url)
+        gtf_pep_path: str = local_ensembl.download_pep(test_url=test_pep_url)
+    else:
+        ####################################################################
+        # LocalEnsembl SETUP for normal mode
+        print("Running in normal mode: downloading full dataset.")
+        local_ensembl: LocalEnsembl = LocalEnsembl(argument_dict["species"],
+                                                   argument_dict["outdir"],
+                                                   argument_dict["release"])
+        gtf_path: str = local_ensembl.download()
+        gtf_pep_path: str = local_ensembl.download_pep()
+
+    ####################################################################
+    
     fas_mode_hex: FASModeHex = FASModeHex()
     if argument_dict["modefas"] is None:
         fas_mode_hex.activate_all()

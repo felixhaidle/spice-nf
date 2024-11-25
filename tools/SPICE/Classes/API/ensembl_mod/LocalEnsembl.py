@@ -84,10 +84,11 @@ class LocalEnsembl:
     def get_taxon_id(self) -> str:
         return self.taxon_id
 
-    def download(self) -> str:
+    def download(self, test_url=None) -> str:
         if not self.is_downloaded():
-            print("\tDownloading " + self.ftp_address + ".")
-            with closing(request.urlopen(self.ftp_address)) as r:
+            download_url = test_url if test_url else self.ftp_address
+            print(f"\tDownloading {download_url}.")
+            with closing(request.urlopen(download_url)) as r:
                 with open(os.path.join(self.goal_directory, self.local_zipname), 'wb') as f:
                     shutil.copyfileobj(r, f)
 
@@ -100,10 +101,11 @@ class LocalEnsembl:
             print("Ensembl file already downloaded. (" + os.path.join(self.goal_directory, self.local_filename) + ")")
         return os.path.join(self.goal_directory, self.local_filename)
 
-    def download_pep(self) -> str:
+    def download_pep(self, test_url=None) -> str:
         if not self.is_pep_downloaded():
-            print("\tDownloading " + self.ftp_pep_address + ".")
-            with closing(request.urlopen(self.ftp_pep_address)) as r:
+            download_url = test_url if test_url else self.ftp_pep_address
+            print(f"\tDownloading {download_url}.")
+            with closing(request.urlopen(download_url)) as r:
                 with open(os.path.join(self.goal_directory, self.local_pep_zipname), 'wb') as f:
                     shutil.copyfileobj(r, f)
 
@@ -113,8 +115,7 @@ class LocalEnsembl:
                     shutil.copyfileobj(f_in, f_out)
             os.remove(os.path.join(self.goal_directory, self.local_pep_zipname))
         else:
-            print("Coding sequences already downloaded. (" + os.path.join(self.goal_directory,
-                                                                          self.local_pep_filename) + ")")
+            print("Coding sequences already downloaded. (" + os.path.join(self.goal_directory, self.local_pep_filename) + ")")
         return os.path.join(self.goal_directory, self.local_pep_filename)
 
     def get_release_num(self) -> str:
