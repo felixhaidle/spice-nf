@@ -18,7 +18,6 @@ workflow LIBRARY_GENERATION {
             outdir,
             test_mode
         )
-
     emit:
-        library = test.ch_library
+        library = test.library_ch
 }
