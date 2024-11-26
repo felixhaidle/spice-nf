@@ -8,3 +8,4 @@ testing*
 *.pyc
 null/
 tools/SPICE/test/*
+test_output/*

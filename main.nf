@@ -30,7 +30,8 @@ workflow BIONF_SPICE_NF {
         species       // String: Ensembl species name
         release       // Integer: Ensembl release version
         anno_tools    // Path: Path to annotation tools file
-        
+        outdir        // Path: Path to output
+        test_mode     // Boolean: Indicating test mode
     main:
 
     //
@@ -39,7 +40,9 @@ workflow BIONF_SPICE_NF {
     SPICE_NF (
         species,       // String: Ensembl species name
         release,       // Integer: Ensembl release version
-        anno_tools    // Path: Path to annotation tools file
+        anno_tools,    // Path: Path to annotation tools file
+        outdir,
+        test_mode
     )
 }
 /*
@@ -63,7 +66,8 @@ workflow {
         params.input,
         params.species,      // Add the species parameter
         params.release,      // Add the release parameter
-        params.anno_tools   // Add the annotation tools parameter
+        params.anno_tools,   // Add the annotation tools parameter
+        params.test_mode
     )
 
     //
@@ -72,7 +76,9 @@ workflow {
     BIONF_SPICE_NF (
         params.species,
         params.release,
-        params.anno_tools
+        params.anno_tools,
+        params.outdir,        // Path: Path to output
+        params.test_mode     // Boolean: Indicating test mode
     )
     //
     // SUBWORKFLOW: Run completion tasks
