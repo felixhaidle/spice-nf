@@ -55,7 +55,11 @@ process FAS_ANNOTATION {
     mkdir -p ${outdir}/annotated_library  
     anno_path=\$(dirname ${anno_tools})
 
-    echo '${anno_tools}' > anno_path.txt
+    
+
+    source "\${anno_path}/fas.profile"
+
+    echo '${anno_tools}' 
 
     fas.doAnno \
         -i "${spice_library_dir}/transcript_data/transcript_set.fasta" \

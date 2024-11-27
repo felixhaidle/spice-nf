@@ -19,12 +19,16 @@ workflow LIBRARY_GENERATION {
             test_mode
         )
 
+        // Define the input for FAS_ANNOTATION based on test_mode
+        fasAnno_library_input = test_mode ? file("${projectDir}/tools/SPICE/test_data/Spice_Library/spice_lib_test_homo_sapiens_94_1ee") : spice_library.library_ch
+
         annotated_library = FAS_ANNOTATION(
             anno_tools,
-            spice_library.library_ch,
+            fasAnno_library_input,
             test_mode,
             outdir
         )
+
 
         annotated_library.annotated_library_ch.view()
 

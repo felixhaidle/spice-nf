@@ -1,6 +1,7 @@
 name: spice_env
 channels:
   - conda-forge
+  - bioconda
 dependencies:
   - python=3.7
   - numpy
@@ -8,11 +9,10 @@ dependencies:
   - scipy
   - matplotlib
   - tqdm
-  - yaml
+  - pyyaml
   - requests
   - plotly
   - pyranges
-  - gzip  
   - pip
   - pip:
       - greedyFAS
