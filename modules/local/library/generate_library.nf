@@ -53,18 +53,12 @@ process FAS_ANNOTATION {
     script:
     """
     mkdir -p ${outdir}/annotated_library  
-    anno_path=\$(dirname ${anno_tools})
-
-    
-
-    source "\${anno_path}/fas.profile"
-
-    echo '${anno_tools}' 
+    source "${anno_tools}/fas.profile"
 
     fas.doAnno \
         -i "${spice_library_dir}/transcript_data/transcript_set.fasta" \
         -o "${spice_library_dir}/fas_data/" \
-        -t "\${anno_path}" \
+        -t "${anno_tools}" \
         -n annotations \
         --cpus ${task.cpus} \
         

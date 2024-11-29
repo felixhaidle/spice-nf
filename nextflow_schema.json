@@ -41,11 +41,11 @@
                 },
                 "anno_tools": {
                     "type": "string",
-                    "format": "file-path",
+                    "format": "directory-path",
                     "exists": true,
-                    "description": "Path to the `annotools.txt` file containing details of annotation tools.",
-                    "help_text": "Specify the path to the file that lists the annotation tools to use. Each line in the file should describe a tool (e.g., ToolName:ToolVersion).",
-                    "fa_icon": "fas fa-file-alt"
+                    "description": "Path to the directory containing annotation tool files.",
+                    "help_text": "Specify the path to the directory where the annotation tool files are stored. Each file in the directory should describe a tool (e.g., ToolName:ToolVersion).",
+                    "fa_icon": "fas fa-folder-open"
                 },
                 "test_mode": {
                     "type": "boolean",
