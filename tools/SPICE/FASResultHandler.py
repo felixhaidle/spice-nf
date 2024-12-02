@@ -50,9 +50,14 @@ def main():
 
     if argument_dict['mode'] == "unpack":
         with open(argument_dict["pairings_path"], "r") as f:
-            gene_id_txt: str = json.load(f)[argument_dict['gene_id']]
-        with open(os.path.join(argument_dict["out_dir"], argument_dict['gene_id'] + ".tsv"), "w") as f:
-            f.write(gene_id_txt)
+            json_data = json.load(f)
+
+        if argument_dict['gene_id'] not in json_data:
+            print(f"Gene ID '{argument_dict['gene_id']}' not found in JSON. Skipping...")
+        else:
+            gene_id_txt: str = json_data[argument_dict['gene_id']]
+            with open(os.path.join(argument_dict["out_dir"], argument_dict['gene_id'] + ".tsv"), "w") as f:
+                f.write(gene_id_txt)
     elif argument_dict['mode'] == "delete":
         os.remove(os.path.join(argument_dict["out_dir"], argument_dict['gene_id'] + ".tsv"))
         os.remove(os.path.join(argument_dict["out_dir"], argument_dict['gene_id'] + "_forward.domains"))

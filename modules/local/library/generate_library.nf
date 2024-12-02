@@ -20,8 +20,6 @@ process GENERATE_LIBRARY {
     """
     mkdir -p library  
 
-    conda list
-
     python ${projectDir}/tools/SPICE/spice_library.py \
         --outdir library \
         --species '${species}' \
@@ -113,20 +111,52 @@ process RESTRUCTURE_ANNO {
 }
 
 process FAS_SCORE_CALCULATION {
-    executor 'local'
-    cpus '1'
+    executor 'slurm'
+    queueSize = '2'
+    queue 'inteli7'
+    cpus '2'
     memory '2G'
     conda '/home/felix/miniconda3/envs/spice_env'
     tag "$gene_id"
-    
-    
+
     input:
         val gene_id // Each gene ID from genes.txt
+        path spice_library // Directory containing all necessary files
+        val outdir // Output directory path
 
-    
+    output:
+        path "${spice_library}/fas_data/tmp/pairwise/${gene_id}/${gene_id}.tsv", emit: gene_tsv_ch, optional: true
 
     script:
     """
-    echo "Processing gene: ${gene_id}"
+    # Ensure output directory exists
+    mkdir -p "${spice_library}/fas_data/tmp/fas_out/${gene_id}"
+    mkdir -p "${spice_library}/fas_data/tmp/pairwise/${gene_id}"
+    
+    # Run FASResultHandler to unpack and process the gene
+    python ${projectDir}/tools/SPICE/FASResultHandler.py \
+        --pairings_path ${spice_library}/transcript_data/transcript_pairings.json \
+        --gene_id ${gene_id} \
+        --mode unpack \
+        --out_dir "${spice_library}/fas_data/tmp/pairwise/${gene_id}"
+
+    if [ -f "${spice_library}/fas_data/tmp/pairwise/${gene_id}/${gene_id}.tsv" ]; then
+        # Run FAS analysis using fas.run
+        fas.run \
+            --seed "${spice_library}/transcript_data/annotations.fasta" \
+            --query "${spice_library}/transcript_data/annotations.fasta" \
+            --annotation_dir "${spice_library}/fas_data" \
+            --out_dir "${spice_library}/fas_data/tmp/fas_out/${gene_id}" \
+            --bidirectional \
+            --pairwise "${spice_library}/fas_data/tmp/pairwise/${gene_id}/${gene_id}.tsv" \
+            --out_name "${gene_id}" \
+            --tsv \
+            --phyloprofile "${spice_library}/transcript_data/phyloprofile_ids.tsv" \
+            --empty_as_1 \
+            --featuretypes "${spice_library}/fas_data/annoTools.txt"
+    else
+        echo "File "${gene_id}.tsv" does not exist. Skipping the command."
+    fi
     """
 }
+

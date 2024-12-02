@@ -48,9 +48,14 @@ workflow LIBRARY_GENERATION {
         genes_ch = restructured_library.genes_txt_ch
             .splitText()
             .map { it.trim() }
-        genes_ch.view()
+        
 
-        FAS_SCORE_CALCULATION(genes_ch)
+        test = FAS_SCORE_CALCULATION(
+            genes_ch,
+            domain_importance_library.domain_importance_library_ch,
+            outdir
+            )
+        test.gene_tsv_ch.view()
 
     emit:
         library = restructured_library.restructured_library_ch
