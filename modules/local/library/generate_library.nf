@@ -45,7 +45,7 @@ process FAS_ANNOTATION {
 
 
     output:
-        path "${outdir}/annotated_library", emit: annotated_library_ch // Declare the generated directory as output
+        path "${spice_library_dir}", emit: annotated_library_ch // Declare the generated directory as output
 
 
     publishDir "${outdir}/annotated_library", mode: 'copy'
@@ -62,5 +62,71 @@ process FAS_ANNOTATION {
         -n annotations \
         --cpus ${task.cpus} \
         
+    """
+}
+
+process GET_DOMAIN_IMPORTANCE {
+    executor 'local'
+    cpus '1'
+    conda '/home/felix/miniconda3/envs/spice_env'
+    input: 
+        path annotated_library // Path: Output from previous step
+        val outdir             // Path: Output directory
+    
+    output:
+        path "${annotated_library}", emit: domain_importance_library_ch
+
+    publishDir "${outdir}/domain_importance_library", mode: 'copy'
+
+    script:
+    """
+    mkdir -p ${outdir}/domain_importance_library 
+
+    python ${projectDir}/tools/SPICE/get_domain_importance.py \
+    -i "${annotated_library}/fas_data/annotations.json" \
+    -o "${annotated_library}/fas_data/"
+    """
+}
+
+process RESTRUCTURE_ANNO {
+    executor 'local'
+    cpus '1'
+    conda '/home/felix/miniconda3/envs/spice_env'
+    input: 
+        path domain_importance_library // Path: Output from previous step
+        val outdir             // Path: Output directory
+    
+    output:
+        path "${domain_importance_library}", emit: restructured_library_ch
+        path "${domain_importance_library}/transcript_data/genes.txt", emit: genes_txt_ch
+
+    publishDir "${outdir}/restructured_library", mode: 'copy'
+
+    script:
+    """
+    mkdir -p ${outdir}/restructured_library
+
+    python ${projectDir}/tools/SPICE/restructure_anno.py \
+    -i "${domain_importance_library}/fas_data/annotations.json" \
+    -o "${domain_importance_library}/fas_data/"
+    """
+}
+
+process FAS_SCORE_CALCULATION {
+    executor 'local'
+    cpus '1'
+    memory '2G'
+    conda '/home/felix/miniconda3/envs/spice_env'
+    tag "$gene_id"
+    
+    
+    input:
+        val gene_id // Each gene ID from genes.txt
+
+    
+
+    script:
+    """
+    echo "Processing gene: ${gene_id}"
     """
 }

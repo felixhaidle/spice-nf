@@ -1,5 +1,9 @@
 include { GENERATE_LIBRARY } from '../../modules/local/library/generate_library'
 include { FAS_ANNOTATION } from '../../modules/local/library/generate_library'
+include { GET_DOMAIN_IMPORTANCE } from '../../modules/local/library/generate_library'
+include { RESTRUCTURE_ANNO } from '../../modules/local/library/generate_library'
+include { FAS_SCORE_CALCULATION } from '../../modules/local/library/generate_library'
+
 
 workflow LIBRARY_GENERATION {
 
@@ -29,10 +33,26 @@ workflow LIBRARY_GENERATION {
             outdir
         )
 
+        domain_importance_library = GET_DOMAIN_IMPORTANCE(
+            annotated_library.annotated_library_ch,
+            outdir
+        )
 
-        annotated_library.annotated_library_ch.view()
+        restructured_library = RESTRUCTURE_ANNO(
+            domain_importance_library.domain_importance_library_ch,
+            outdir
+        )
+      
+
+        // Channel to read gene IDs from the file
+        genes_ch = restructured_library.genes_txt_ch
+            .splitText()
+            .map { it.trim() }
+        genes_ch.view()
+
+        FAS_SCORE_CALCULATION(genes_ch)
 
     emit:
-        library = spice_library.library_ch
+        library = restructured_library.restructured_library_ch
         
 }
