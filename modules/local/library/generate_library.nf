@@ -24,7 +24,7 @@ process GENERATE_LIBRARY {
         --outdir library \
         --species '${species}' \
         --release '${release}' \
-        --test 
+        ${test_mode ? '--test' : ''}
         
     """
 }
@@ -157,6 +157,33 @@ process FAS_SCORE_CALCULATION {
     else
         echo "File "${gene_id}.tsv" does not exist. Skipping the command."
     fi
+    """
+}
+
+process FAS_RESULT_COLLECTION {
+    executor 'local'
+    cpus '1'
+    memory '7G'
+    conda '/home/felix/miniconda3/envs/spice_env'
+    tag 'result_collection'
+
+    input:
+        path spice_library // Directory containing all necessary files
+        val outdir // Output directory path
+        path gene_tsv_ch // Gathered .tsv files from workflow
+
+    script:
+    """
+    # Run the concat mode to gather results
+    python ${projectDir}/tools/SPICE/FASResultHandler.py \
+        --mode concat \
+        --out_dir "${spice_library}/fas_data/tmp" \
+        --anno_dir "${spice_library}/fas_data"
+
+    # Run the delete mode to clean up temporary files
+    python ${projectDir}/tools/SPICE/FASResultHandler.py \
+        --mode delete \
+        --out_dir "${spice_library}/fas_data/tmp"
     """
 }
 
