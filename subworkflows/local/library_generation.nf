@@ -57,6 +57,15 @@ workflow LIBRARY_GENERATION {
             )
         test.gene_tsv_ch.view()
 
+        // Result collection step
+        /* Collect the outputs after all parallel processes are complete
+        FAS_RESULT_COLLECTION(
+            spice_library = domain_importance_library.domain_importance_library_ch,
+            outdir = outdir,
+            gene_tsv_ch = gene_results.gene_tsv_ch.collect()
+        )
+        */
+
     emit:
         library = restructured_library.restructured_library_ch
         
