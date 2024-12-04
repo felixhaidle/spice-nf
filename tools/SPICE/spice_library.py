@@ -178,11 +178,29 @@ def collect_sequences(gene_assembler: GeneAssembler,
 
     gene_list: List[Gene] = gene_assembler.get_genes()
 
-    for gene in tqdm(gene_list, ncols=100,
-                     total=len(gene_list), desc="Sequence collection progress"):
+    # Track missing sequences
+    missing_proteins = []
+
+    # Iterate through genes and their proteins
+    for gene in tqdm(gene_list, ncols=100, total=len(gene_list), desc="Sequence collection progress"):
         protein_list: List[Protein] = gene.get_proteins()
         for protein in protein_list:
-            protein.set_sequence(fasta_dict[gene.get_id()][protein.get_id()])
+            gene_id = gene.get_id()
+            protein_id = protein.get_id()
+
+            # Check if the sequence exists in the FASTA dictionary
+            if gene_id in fasta_dict and protein_id in fasta_dict[gene_id]:
+                protein.set_sequence(fasta_dict[gene_id][protein_id])
+            else:
+                # Log the missing protein
+                missing_proteins.append((gene_id, protein_id))
+                print(f"Missing sequence for Gene ID: {gene_id}, Protein ID: {protein_id}")
+
+    # Log all missing proteins at the end
+    if missing_proteins:
+        print(f"Missing proteins (not found in FASTA):")
+        for gene_id, protein_id in missing_proteins:
+            print(f"  Gene ID: {gene_id}, Protein ID: {protein_id}")
     gene_assembler.clear_empty_genes()
     gene_assembler.save_seq(pass_path)
     gene_assembler.save_fas(pass_path)

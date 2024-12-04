@@ -3,6 +3,7 @@ include { FAS_ANNOTATION } from '../../modules/local/library/generate_library'
 include { GET_DOMAIN_IMPORTANCE } from '../../modules/local/library/generate_library'
 include { RESTRUCTURE_ANNO } from '../../modules/local/library/generate_library'
 include { FAS_SCORE_CALCULATION } from '../../modules/local/library/generate_library'
+include { CREATE_RESULT_DIRECTORY } from '../../modules/local/library/generate_library'
 
 
 workflow LIBRARY_GENERATION {
@@ -50,12 +51,12 @@ workflow LIBRARY_GENERATION {
             .map { it.trim() }
         
 
-        test = FAS_SCORE_CALCULATION(
+        fas_scores = FAS_SCORE_CALCULATION(
             genes_ch,
             domain_importance_library.domain_importance_library_ch,
             outdir
             )
-        test.gene_tsv_ch.view()
+        fas_scores.gene_tsv_ch.collect().view()
 
         // Result collection step
         /* Collect the outputs after all parallel processes are complete
@@ -66,7 +67,13 @@ workflow LIBRARY_GENERATION {
         )
         */
 
+        results_directory = CREATE_RESULT_DIRECTORY(
+                domain_importance_library.domain_importance_library_ch,
+                outdir,
+                fas_scores.gene_tsv_ch.collect()
+        )
+
     emit:
-        library = restructured_library.restructured_library_ch
+        library = results_directory.result_directory_ch
         
 }

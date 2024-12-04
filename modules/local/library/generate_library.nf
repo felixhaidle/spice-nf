@@ -112,7 +112,7 @@ process RESTRUCTURE_ANNO {
 
 process FAS_SCORE_CALCULATION {
     executor 'slurm'
-    queueSize = '2'
+    queueSize = '10'
     queue 'inteli7'
     cpus '2'
     memory '2G'
@@ -170,7 +170,7 @@ process FAS_RESULT_COLLECTION {
     input:
         path spice_library // Directory containing all necessary files
         val outdir // Output directory path
-        path gene_tsv_ch // Gathered .tsv files from workflow
+        path gene_tsv_ch // Gathered fas score directories
 
     script:
     """
@@ -184,6 +184,35 @@ process FAS_RESULT_COLLECTION {
     python ${projectDir}/tools/SPICE/FASResultHandler.py \
         --mode delete \
         --out_dir "${spice_library}/fas_data/tmp"
+    """
+}
+
+
+process CREATE_RESULT_DIRECTORY {
+    executor 'local'
+    cpus '1'
+    memory '7G'
+    conda '/home/felix/miniconda3/envs/spice_env'
+    
+
+    input:
+        path spice_library // Directory containing all necessary files
+        val outdir // Output directory path
+        val fas_scores
+    
+    output:
+        path "result_directory", emit: result_directory_ch
+
+    publishDir "${outdir}/result_directory", mode: 'copy'
+
+    script:
+    """
+    mkdir -p "result_directory"
+
+    python ${projectDir}/tools/SPICE/spice_result.py \
+    -m setup \
+    -l ${spice_library} \
+    -o "result_directory"
     """
 }
 
