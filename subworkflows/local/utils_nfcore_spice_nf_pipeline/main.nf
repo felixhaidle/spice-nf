@@ -36,6 +36,8 @@ workflow PIPELINE_INITIALISATION {
     release       // string: Ensembl release (e.g., "GRCh38")
     anno_tools    // string: path to FAS anno tools
     test_mode     // Boolean: indicating test mode
+    annotation_gtf
+    peptide_fasta
 
     main:
 

@@ -32,6 +32,8 @@ workflow BIONF_SPICE_NF {
         anno_tools    // Path: Path to annotation tools file
         outdir        // Path: Path to output
         test_mode     // Boolean: Indicating test mode
+        annotation_gtf  // Path: Path to GTF annotation file
+        peptide_fasta   // Path: Path to peptide FASTA file
     main:
 
     //
@@ -42,7 +44,9 @@ workflow BIONF_SPICE_NF {
         release,       // Integer: Ensembl release version
         anno_tools,    // Path: Path to annotation tools file
         outdir,
-        test_mode
+        test_mode,
+        annotation_gtf, // Path: Path to GTF annotation file
+        peptide_fasta   // Path: Path to peptide FASTA file
     )
 }
 /*
@@ -67,7 +71,9 @@ workflow {
         params.species,      // Add the species parameter
         params.release,      // Add the release parameter
         params.anno_tools,   // Add the annotation tools parameter
-        params.test_mode
+        params.test_mode,
+        params.annotation_gtf,  // New parameter
+        params.peptide_fasta    // New parameter
     )
 
     //
@@ -77,8 +83,10 @@ workflow {
         params.species,
         params.release,
         params.anno_tools,
-        params.outdir,        // Path: Path to output
-        params.test_mode     // Boolean: Indicating test mode
+        params.outdir,        
+        params.test_mode,     
+        params.annotation_gtf,  
+        params.peptide_fasta    
     )
     //
     // SUBWORKFLOW: Run completion tasks

@@ -51,6 +51,13 @@ process FAS_ANNOTATION {
     script:
     """
     mkdir -p ${outdir}/annotated_library  
+    
+
+    # Replace annoTools.txt in spice_library_dir with the one from anno_tools
+    cp "${anno_tools}/annoTools.txt" "${spice_library_dir}/fas_data/annoTools.txt"
+
+
+    # run the annotaion
     source "${anno_tools}/fas.profile"
 
     fas.doAnno \
@@ -112,7 +119,7 @@ process RESTRUCTURE_ANNO {
 
 process FAS_SCORE_CALCULATION {
     executor 'slurm'
-    queueSize = '10'
+    maxForks 10
     queue 'inteli7'
     cpus '2'
     memory '2G'

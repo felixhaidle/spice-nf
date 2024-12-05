@@ -25,6 +25,8 @@ workflow SPICE_NF {
         anno_tools    // Path: Path to annotation tools file
         outdir        // Path: Output directory for the library
         test_mode     // Boolean: Whether to run in test mode
+        annotation_gtf  
+        peptide_fasta   
 
     main:
 
@@ -36,7 +38,9 @@ workflow SPICE_NF {
             release = release,
             anno_tools = anno_tools,
             outdir = outdir,
-            test_mode = test_mode
+            test_mode = test_mode,
+            annotation_gtf = annotation_gtf,
+            peptide_fasta = peptide_fasta
         ).set { ch_library }
 
         //

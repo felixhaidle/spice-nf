@@ -4,6 +4,10 @@ include { GET_DOMAIN_IMPORTANCE } from '../../modules/local/library/generate_lib
 include { RESTRUCTURE_ANNO } from '../../modules/local/library/generate_library'
 include { FAS_SCORE_CALCULATION } from '../../modules/local/library/generate_library'
 include { CREATE_RESULT_DIRECTORY } from '../../modules/local/library/generate_library'
+include { SEQUENCE_FILES } from '../../modules/local/library/setup_library'
+include { CREATE_LIBRARY } from '../../modules/local/library/setup_library'
+include { FILTER_LIBRARY } from '../../modules/local/library/setup_library'
+include { FINISH_LIBRARY_INITIALIZATION } from '../../modules/local/library/setup_library'
 
 
 workflow LIBRARY_GENERATION {
@@ -14,18 +18,51 @@ workflow LIBRARY_GENERATION {
         anno_tools
         outdir
         test_mode
+        annotation_gtf
+        peptide_fasta
 
     main:
 
+        sequence_files = SEQUENCE_FILES(
+            species,
+            release,
+            test_mode,
+            annotation_gtf,
+            peptide_fasta
+        )
+
+        create_library = CREATE_LIBRARY(
+            sequence_files.gtf_file,
+            sequence_files.fasta_file,
+            species,
+            release
+        )
+        
+
+        filter_library = FILTER_LIBRARY(
+            create_library.library_dir,
+        )
+
+        
+
+        
+        finished_library = FINISH_LIBRARY_INITIALIZATION(
+            filter_library.filtered_library_dir
+        )
+        finished_library.finished_library_dir.view()
+
+        /*
         spice_library = GENERATE_LIBRARY(
             species,
             release,
             outdir,
             test_mode
         )
+        */
 
         // Define the input for FAS_ANNOTATION based on test_mode
-        fasAnno_library_input = test_mode ? file("${projectDir}/tools/SPICE/test_data/Spice_Library/spice_lib_test_homo_sapiens_94_1ee") : spice_library.library_ch
+        // fasAnno_library_input = test_mode ? file("${projectDir}/tools/SPICE/test_data/Spice_Library/spice_lib_test_homo_sapiens_94_1ee") : finished_library.finished_library_dir
+        fasAnno_library_input = finished_library.finished_library_dir
 
         annotated_library = FAS_ANNOTATION(
             anno_tools,

@@ -53,6 +53,20 @@
                     "default": false,
                     "fa_icon": "fas fa-vial",
                     "help_text": "Set this flag to `true` to run the pipeline in test mode. This will use minimal datasets for faster execution."
+                },
+                "annotation_gtf": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Path to the GTF annotation file.",
+                    "fa_icon": "fas fa-file-alt",
+                    "help_text": "Provide the path to the GTF annotation file if available. This parameter is optional."
+                },
+                "peptide_fasta": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Path to the peptide FASTA file.",
+                    "fa_icon": "fas fa-file-alt",
+                    "help_text": "Provide the path to the peptide FASTA file if available. This parameter is optional."
                 }
             }
         },
