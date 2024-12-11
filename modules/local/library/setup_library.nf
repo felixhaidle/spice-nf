@@ -9,7 +9,7 @@ process SEQUENCE_FILES {
 
     output:
         path '*.gtf', emit: gtf_file
-        path '*.fa', emit: fasta_file
+        path '*.fa*', emit: fasta_file
 
 
     script:

@@ -3,7 +3,7 @@ include { FAS_ANNOTATION } from '../../modules/local/library/generate_library'
 include { GET_DOMAIN_IMPORTANCE } from '../../modules/local/library/generate_library'
 include { RESTRUCTURE_ANNO } from '../../modules/local/library/generate_library'
 include { FAS_SCORE_CALCULATION } from '../../modules/local/library/generate_library'
-include { CREATE_RESULT_DIRECTORY } from '../../modules/local/library/generate_library'
+include { PARSE_DOMAIN_OUTPUT } from '../../modules/local/library/generate_library'
 include { SEQUENCE_FILES } from '../../modules/local/library/setup_library'
 include { CREATE_LIBRARY } from '../../modules/local/library/setup_library'
 include { FILTER_LIBRARY } from '../../modules/local/library/setup_library'
@@ -40,7 +40,7 @@ workflow LIBRARY_GENERATION {
         
 
         filter_library = FILTER_LIBRARY(
-            create_library.library_dir,
+            create_library.library_dir
         )
 
         
@@ -49,7 +49,7 @@ workflow LIBRARY_GENERATION {
         finished_library = FINISH_LIBRARY_INITIALIZATION(
             filter_library.filtered_library_dir
         )
-        finished_library.finished_library_dir.view()
+        
 
         /*
         spice_library = GENERATE_LIBRARY(
@@ -67,18 +67,18 @@ workflow LIBRARY_GENERATION {
         annotated_library = FAS_ANNOTATION(
             anno_tools,
             fasAnno_library_input,
-            test_mode,
-            outdir
+      
+            
         )
 
         domain_importance_library = GET_DOMAIN_IMPORTANCE(
-            annotated_library.annotated_library_ch,
-            outdir
+            annotated_library.annotated_library_ch
+            
         )
 
         restructured_library = RESTRUCTURE_ANNO(
-            domain_importance_library.domain_importance_library_ch,
-            outdir
+            domain_importance_library.domain_importance_library_ch
+            
         )
       
 
@@ -90,11 +90,9 @@ workflow LIBRARY_GENERATION {
 
         fas_scores = FAS_SCORE_CALCULATION(
             genes_ch,
-            domain_importance_library.domain_importance_library_ch,
-            outdir
+            restructured_library.restructured_library_ch
             )
-        fas_scores.gene_tsv_ch.collect().view()
-
+        
         // Result collection step
         /* Collect the outputs after all parallel processes are complete
         FAS_RESULT_COLLECTION(
@@ -104,13 +102,14 @@ workflow LIBRARY_GENERATION {
         )
         */
 
-        results_directory = CREATE_RESULT_DIRECTORY(
-                domain_importance_library.domain_importance_library_ch,
-                outdir,
-                fas_scores.gene_tsv_ch.collect()
+        fas_score_library = fas_scores.finished_library.last()
+
+        results_directory = PARSE_DOMAIN_OUTPUT(
+            fas_score_library,
+            outdir
         )
 
     emit:
-        library = results_directory.result_directory_ch
+        library = results_directory.spice_library_ch
         
 }
