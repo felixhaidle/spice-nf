@@ -15,4 +15,4 @@ dependencies:
   - pyranges
   - pip
   - pip:
-      - greedyFAS
+    - greedyFAS

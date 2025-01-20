@@ -1,5 +1,5 @@
 process SEQUENCE_FILES {
-    conda '/home/felix/miniconda3/envs/spice_env'
+    
     input:
         val species
         val release
@@ -11,7 +11,8 @@ process SEQUENCE_FILES {
         path '*.gtf', emit: gtf_file
         path '*.fa*', emit: fasta_file
 
-
+    publishDir = null
+    
     script:
     """
 
@@ -28,7 +29,7 @@ process SEQUENCE_FILES {
 }
 
 process CREATE_LIBRARY {
-    conda '/home/felix/miniconda3/envs/spice_env'
+
     input:
         path gtf_file
         path fasta_file
@@ -54,7 +55,7 @@ process CREATE_LIBRARY {
 }
 
 process FILTER_LIBRARY {
-    conda '/home/felix/miniconda3/envs/spice_env'
+
     input:
         path library_dir
 
@@ -69,7 +70,7 @@ process FILTER_LIBRARY {
 }
 
 process FINISH_LIBRARY_INITIALIZATION {
-    conda '/home/felix/miniconda3/envs/spice_env'
+
     input:
         path library_dir
 

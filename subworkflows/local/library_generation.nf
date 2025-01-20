@@ -3,6 +3,7 @@ include { FAS_ANNOTATION } from '../../modules/local/library/generate_library'
 include { GET_DOMAIN_IMPORTANCE } from '../../modules/local/library/generate_library'
 include { RESTRUCTURE_ANNO } from '../../modules/local/library/generate_library'
 include { FAS_SCORE_CALCULATION } from '../../modules/local/library/generate_library'
+include { CONCAT_FAS_SCORES } from '../../modules/local/library/generate_library'
 include { PARSE_DOMAIN_OUTPUT } from '../../modules/local/library/generate_library'
 include { SEQUENCE_FILES } from '../../modules/local/library/setup_library'
 include { CREATE_LIBRARY } from '../../modules/local/library/setup_library'
@@ -90,7 +91,8 @@ workflow LIBRARY_GENERATION {
 
         fas_scores = FAS_SCORE_CALCULATION(
             genes_ch,
-            restructured_library.restructured_library_ch
+            restructured_library.restructured_library_ch,
+            anno_tools
             )
         
         // Result collection step
@@ -102,10 +104,19 @@ workflow LIBRARY_GENERATION {
         )
         */
 
-        fas_score_library = fas_scores.finished_library.last()
+        fas_score_library = fas_scores.fas_scored_directories.collect()
+
+
+        concatenated_fas_scores_library = CONCAT_FAS_SCORES (
+            fas_score_library,
+            restructured_library.restructured_library_ch
+        )
+                    
+
+        updated_library = concatenated_fas_scores_library.finished_library
 
         results_directory = PARSE_DOMAIN_OUTPUT(
-            fas_score_library,
+            updated_library,
             outdir
         )
 
