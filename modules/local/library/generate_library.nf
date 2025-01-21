@@ -106,7 +106,7 @@ process RESTRUCTURE_ANNO {
  
     python ${projectDir}/tools/SPICE/restructure_anno.py \
     -i "${domain_importance_library}/fas_data/annotations.json" \
-    -o "${domain_importance_library}/fas_data/"
+    -o "${domain_importance_library}/fas_data/architectures"
     """
 }
 
@@ -208,7 +208,7 @@ process CONCAT_FAS_SCORES {
         gene_id=\${subdir}
 
         echo "[\$count/\$total] Starting: Concatenation for gene \${gene_id}"
-
+        
 
         python "${projectDir}/tools/SPICE/FASResultHandler.py" \
             --mode concat \
@@ -226,6 +226,15 @@ process CONCAT_FAS_SCORES {
 
         echo "[\${count}/\${total}] Finished: Cleanup for gene \${gene_id}"
     done
+
+    echo "Starting FAS score integration"
+
+        python "${projectDir}/tools/SPICE/FASResultHandler.py" \
+            --mode integrate \
+            --out_dir "${spice_library}/fas_data/" \
+            --anno_dir "${spice_library}/fas_data"
+
+        echo "FAS score integration completed."
 
     echo "Processing complete. All \$total genes processed."
 
@@ -254,7 +263,8 @@ process PARSE_DOMAIN_OUTPUT {
     python ${projectDir}/tools/SPICE/parse_domain_out.py \
     -f "${spice_library}/fas_data/forward.domains" \
     -r "${spice_library}/fas_data/reverse.domains" \
-    -m "${spice_library}/fas_data/" \
-    -o "${spice_library}/fas_data"
+    -m "${spice_library}/fas_data/architectures" \
+    -o "${spice_library}/fas_data/architectures/"
+    
     """
 }

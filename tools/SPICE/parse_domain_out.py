@@ -42,23 +42,18 @@ def option_parse():
     args = parser.parse_args()
     main(args.forwardPath, args.reversePath, args.mapPath, args.outPath)
 
-
 def main(forwardpath, reversepath, mappath, outpath):
     with open(mappath + '/index.json', 'r') as infile:
         files = json.loads(infile.read())['#files']
-    read_input((forwardpath, reversepath), mappath, files)
+    read_input((forwardpath, reversepath), mappath, files, outpath)
 
-
-    
 def save2json(dict2save, name, directory):
     Path(directory).mkdir(parents=True, exist_ok=True)
     jsonOut = json.dumps(dict2save, ensure_ascii=False)
-    out = open(directory + '/' + name + '.json', 'w')
-    out.write(jsonOut)
-    out.close()
+    with open(directory + '/' + name + '.json', 'w') as out:
+        out.write(jsonOut)  
 
-
-def read_input(inpaths, mappath, files):
+def read_input(inpaths, mappath, files, outpath):
     for i in [0, 1]:
         with open(inpaths[i], 'r') as infile:
             lines = infile.readlines()
@@ -85,7 +80,7 @@ def read_input(inpaths, mappath, files):
             if i == 0:
                 lin = {}
             else:
-                with open(mappath + '/' + str(index).rjust(9, '0') + '_paths.json', 'r') as pathfile:
+                with open(outpath + '/' + str(index).rjust(9, '0') + '_paths.json', 'r') as pathfile:
                     lin = json.loads(pathfile.read())
             for gene in mapfile:
                 if gene in index2:
@@ -119,10 +114,7 @@ def read_input(inpaths, mappath, files):
                                 lin[gid][pkey][0].append(fid)
                             elif rp == p2:
                                 lin[gid][pkey][1].append(fid)
-            save2json(lin, str(index).rjust(9, '0') + '_paths', mappath)
-
-
+            save2json(lin, str(index).rjust(9, '0') + '_paths', outpath)
 
 if __name__ == '__main__':
     option_parse()
-

@@ -7,5 +7,5 @@ testing/
 testing*
 *.pyc
 null/
-tools/SPICE/test/*
+tools/SPICE/test_data/*
 test_output/*
