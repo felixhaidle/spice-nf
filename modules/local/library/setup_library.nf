@@ -1,5 +1,5 @@
 process SEQUENCE_FILES {
-    
+
     input:
         val species
         val release
@@ -11,12 +11,11 @@ process SEQUENCE_FILES {
         path '*.gtf', emit: gtf_file
         path '*.fa*', emit: fasta_file
 
-    publishDir = null
-    
+
     script:
     """
 
-    
+
     python ${projectDir}/tools/spice_library_scripts/sequences.py \
     --outdir "./" \
     --species ${species} \
@@ -38,19 +37,20 @@ process CREATE_LIBRARY {
 
     output:
         path 'spice_lib_*', emit: library_dir
-        
+
 
     script:
     """
-    
+
 
     python ${projectDir}/tools/spice_library_scripts/create_library.py \
     --outdir "./" \
     --gtf_path ${gtf_file} \
     --fasta_path ${fasta_file} \
     --species ${species} \
-    --release ${release} \
-    
+    --release ${release}
+
+
     """
 }
 
