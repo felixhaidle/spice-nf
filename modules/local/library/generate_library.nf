@@ -110,13 +110,14 @@ process FAS_SCORE_CALCULATION {
     executor 'slurm'
     maxForks 10
     queue 'all'
-    cpus '2'
-    memory '2G'
+    cpus { ext.resources[requirements].cpus }
+    memory { ext.resources[requirements].memory }
 
     tag "$gene_id"
 
+
     input:
-        val gene_id // Each gene ID from genes.txt
+        tuple(val(gene_id),val(requirements)) // Each gene ID from genes.txt with added size
         path spice_library // Directory containing all necessary files
         path anno_tools //path to annotools.txt
 
