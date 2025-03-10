@@ -112,6 +112,7 @@ process FAS_SCORE_CALCULATION {
     queue 'all'
     cpus { ext.resources[requirements].cpus }
     memory { ext.resources[requirements].memory }
+    time { ext.resources[requirements].time }
 
     tag "$gene_id"
 

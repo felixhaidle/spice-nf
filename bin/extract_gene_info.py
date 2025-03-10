@@ -41,7 +41,7 @@ def parse_gtf(gtf_file, gene_id):
     # Assign resources based only on transcript count
     if transcript_count < 3:
         requirements = "small"
-    elif transcript_count < 20:
+    elif transcript_count < 15:
         requirements = "medium"
     else:
         requirements = "large"
