@@ -17,9 +17,10 @@ from Classes.SequenceHandling.GeneAssembler import GeneAssembler
 from Classes.SequenceHandling.LibraryInfo import LibraryInfo
 from Classes.PassPath.PassPath import PassPath
 
-def remove_incorrect_entries(gene_assembler):
+def remove_incorrect_entries(gene_assembler, pass_path):
     """
-    Remove incorrect entries from the library based on the original filtering logic.
+    Remove incorrect entries from the library based on the original filtering logic,
+    with debug prints to trace the filtering decisions.
 
     Args:
     - gene_assembler (GeneAssembler): The gene assembler object containing the gene data.
@@ -28,11 +29,35 @@ def remove_incorrect_entries(gene_assembler):
     for gene in tqdm(gene_list, ncols=100, total=len(gene_list), desc="Incorrect entry removal progress"):
         transcript_list = gene.get_transcripts()
         for transcript in transcript_list:
+            transcript_id = transcript.get_id()
+            gene_id = gene.get_id()
+            print(f"Checking transcript {transcript_id} from gene {gene_id}")
+
             if transcript.get_biotype() == "protein_coding":
+                print("  - Biotype is protein_coding")
                 if transcript.get_id_taxon() == 9606:
-                    if transcript.get_id()[3] == "T" and "NOVEL" not in transcript.get_tags():
-                        gene.delete_transcript(transcript.get_id())
+                    print("  - Taxon is human (9606)")
+                    # Check if the fourth character is 'T'
+                    char_at_index = transcript_id[3] if len(transcript_id) > 3 else "N/A"
+                    print(f"  - Character at index 3 is: {char_at_index}")
+
+                    if char_at_index == "T":
+                        if "NOVEL" not in transcript.get_tags():
+                            print(f"  - 'NOVEL' tag not found in tags {transcript.get_tags()}, deleting transcript {transcript_id}")
+                            gene.delete_transcript(transcript.get_id())
+                        else:
+                            print(f"  - 'NOVEL' tag found in tags {transcript.get_tags()}, keeping transcript {transcript_id}")
+                    else:
+                        print(f"  - Character at index 3 is not 'T', skipping transcript {transcript_id}")
+                else:
+                    print(f"  - Taxon is not human (found {transcript.get_id_taxon()}), skipping transcript {transcript_id}")
+            else:
+                print(f"  - Biotype is not protein_coding (found {transcript.get_biotype()}), skipping transcript {transcript_id}")
     gene_assembler.clear_empty_genes()
+    gene_assembler.save_seq(pass_path)
+    gene_assembler.save_fas(pass_path)
+    gene_assembler.save_info(pass_path)
+
 
 def filter_gene_library(library_dir):
     """
@@ -65,7 +90,7 @@ def filter_gene_library(library_dir):
 
     # Perform filtering to remove incorrect entries
     print("Removing incorrect entries from the gene library...")
-    remove_incorrect_entries(gene_assembler)
+    remove_incorrect_entries(gene_assembler,pass_path)
 
     # Save the filtered library
     print("Saving the filtered gene library...")
