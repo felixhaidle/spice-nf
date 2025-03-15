@@ -9,7 +9,6 @@ include { SEQUENCE_FILES } from '../../modules/local/library/setup_library'
 include { CREATE_LIBRARY } from '../../modules/local/library/setup_library'
 include { FILTER_LIBRARY } from '../../modules/local/library/setup_library'
 include { FINISH_LIBRARY_INITIALIZATION } from '../../modules/local/library/setup_library'
-include { GET_GENE_SIZE } from '../../modules/local/library/get_gene_size.nf'
 
 
 workflow LIBRARY_GENERATION {
@@ -86,16 +85,14 @@ workflow LIBRARY_GENERATION {
 
         // Channel to read gene IDs from the file
         genes_ch = restructured_library.genes_txt_ch
-            .splitText()
-            .map { it.trim() }
+        .splitText()
+        .map { it.trim().split(' ') }
+        .map { tuple(it[0], it[1]) }
 
-        gene_ch_with_size = GET_GENE_SIZE(
-            genes_ch,
-            annotation_gtf
-        )
+
 
         fas_scores = FAS_SCORE_CALCULATION(
-            gene_ch_with_size,
+            genes_ch,
             restructured_library.restructured_library_ch,
             anno_tools
             )

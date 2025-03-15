@@ -24,9 +24,30 @@ from Classes.SequenceHandling.Gene import Gene
 from Classes.SequenceHandling.Protein import Protein
 from Classes.FASTools.FASModeHex import FASModeHex
 
+def classify_gene_size(gene) -> str:
+    """
+    Classify a gene based on the combined length of all its transcript sequences.
+
+    Args:
+    - gene (Gene): A gene object containing transcripts.
+
+    Returns:
+    - str: The size category ('small', 'medium', 'large').
+    """
+    # Compute the total transcript sequence length
+    total_length = sum(len(protein.get_sequence()) for protein in gene.get_proteins() if isinstance(protein, Protein))
+    print(total_length)
+    # Define thresholds (adjust based on empirical data)
+    if total_length < 5000:
+        return "small"
+    elif total_length < 50000:
+        return "medium"
+    else:
+        return "large"
+
 def write_gene_ids_to_file(gene_assembler: GeneAssembler, transcript_data_dir: str) -> None:
     """
-    Write all gene IDs in the library to a file in the transcript_data directory.
+    Write all gene IDs and their size classification in the library to a file in the transcript_data directory.
 
     Args:
     - gene_assembler (GeneAssembler): The gene assembler object containing the gene data.
@@ -34,13 +55,15 @@ def write_gene_ids_to_file(gene_assembler: GeneAssembler, transcript_data_dir: s
     """
     # Construct the full path for genes.txt
     output_file = os.path.join(transcript_data_dir, "genes.txt")
-    
+
     gene_list = gene_assembler.get_genes()
     with open(output_file, "w") as f:
         for gene in gene_list:
-            f.write(gene.get_id() + "\n")
-    
-    print(f"Gene IDs written to {output_file}.")
+            size_category = classify_gene_size(gene)
+            f.write(f"{gene.get_id()} {size_category}\n")  # Write gene ID with size classification
+            print(f"{gene.get_id()} {size_category}\n")
+
+    print(f"Gene IDs with size classification written to {output_file}.")
 
 
 
@@ -175,7 +198,7 @@ def remove_small_proteins(gene_assembler: GeneAssembler, library_info: LibraryIn
         for protein in protein_list:
             if len(protein) < min_length:
                 gene.delete_transcript(protein.get_id())
-    
+
     # Clear genes that have no valid transcripts left
     gene_assembler.clear_empty_genes()
 
@@ -222,7 +245,7 @@ def main():
             fas_mode_list = f.read().split("\n")
         fas_mode_list += ["#linearized", "#normal", "#checked"]
         fas_mode_hex.activate_modes(fas_mode_list)
-    
+
     mode_hex_value = fas_mode_hex.get_mode_hex()  # Obtain the FAS mode hex value for use
 
     # Create library structure and write initial files
