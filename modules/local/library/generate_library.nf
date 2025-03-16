@@ -1,27 +1,3 @@
-process GENERATE_LIBRARY {
-    memory '2 GB'  // Set a default memory value
-    cpus '1'
-
-    input:
-        val species          // String: Species name
-        val release         // Integer: Ensembl release version
-        val outdir             // Path: Output directory
-
-    output:
-
-        path "library/spice_lib_*", emit: library_ch
-
-    script:
-    """
-    mkdir -p library
-
-    python ${projectDir}/tools/SPICE/spice_library.py \
-        --outdir library \
-        --species '${species}' \
-        --release '${release}'
-
-    """
-}
 
 
 process FAS_ANNOTATION {
@@ -77,7 +53,7 @@ process GET_DOMAIN_IMPORTANCE {
     script:
     """
 
-    python ${projectDir}/tools/SPICE/get_domain_importance.py \
+    get_domain_importance.py \
     -i "${annotated_library}/fas_data/annotations.json" \
     -o "${annotated_library}/fas_data/"
     """
@@ -100,7 +76,7 @@ process RESTRUCTURE_ANNO {
     script:
     """
 
-    python ${projectDir}/tools/SPICE/restructure_anno.py \
+    restructure_anno.py \
     -i "${domain_importance_library}/fas_data/annotations.json" \
     -o "${domain_importance_library}/fas_data/architectures"
     """
@@ -134,7 +110,7 @@ process FAS_SCORE_CALCULATION {
 
     # Run FASResultHandler to unpack and process the gene
     echo "Starting: Unpacking gene ${gene_id}"
-    python ${projectDir}/tools/SPICE/FASResultHandler.py \
+    FASResultHandler.py \
         --pairings_path ${spice_library}/transcript_data/transcript_pairings.json \
         --gene_id ${gene_id} \
         --mode unpack \
@@ -242,26 +218,18 @@ process CONCAT_FAS_SCORES {
         echo "[\$count/\$total] Starting: Concatenation for gene \${gene_id}"
 
 
-        python "${projectDir}/tools/SPICE/FASResultHandler.py" \
+        FASResultHandler.py \
             --mode concat \
             --gene_id "\${gene_id}" \
             --out_dir "\${gene_id}" \
             --anno_dir "${spice_library}/fas_data/"
 
         echo "[\$count/\$total] Finished: Concatenation for gene \${gene_id}"
-
-        #echo "[\$count/\$total] Starting: Cleanup for gene \${gene_id}"
-        #python "\${projectDir}/tools/SPICE/FASResultHandler.py" \
-        #    --mode delete \
-        #    --gene_id "\${gene_id}" \
-        #    --out_dir "tmp/fas_\${gene_id}"
-
-        echo "[\${count}/\${total}] Finished: Cleanup for gene \${gene_id}"
     done
 
     echo "Starting FAS score integration"
 
-        python "${projectDir}/tools/SPICE/FASResultHandler.py" \
+        FASResultHandler.py \
             --mode integrate \
             --out_dir "${spice_library}/fas_data/" \
             --anno_dir "${spice_library}/fas_data"
@@ -278,6 +246,7 @@ process CONCAT_FAS_SCORES {
 process PARSE_DOMAIN_OUTPUT {
     executor 'local'
     cpus '1'
+    publishDir "${outdir}", mode: 'copy'
 
     input:
         path spice_library // Path: Output from previous step
@@ -288,12 +257,12 @@ process PARSE_DOMAIN_OUTPUT {
         path "${spice_library}", emit: spice_library_ch
 
 
-    publishDir "${outdir}", mode: 'copy'
+
 
     script:
     """
 
-    python ${projectDir}/tools/SPICE/parse_domain_out.py \
+    parse_domain_out.py \
     -f "${spice_library}/fas_data/forward.domains" \
     -r "${spice_library}/fas_data/reverse.domains" \
     -m "${spice_library}/fas_data/architectures" \

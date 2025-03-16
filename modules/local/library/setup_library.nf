@@ -16,7 +16,7 @@ process SEQUENCE_FILES {
     """
 
 
-    python ${projectDir}/tools/spice_library_scripts/sequences.py \
+    sequences.py \
     --outdir "./" \
     --species ${species} \
     --release ${release} \
@@ -43,7 +43,7 @@ process CREATE_LIBRARY {
     """
 
 
-    python ${projectDir}/tools/spice_library_scripts/create_library.py \
+    create_library.py \
     --outdir "./" \
     --gtf_path ${gtf_file} \
     --fasta_path ${fasta_file} \
@@ -64,7 +64,7 @@ process FILTER_LIBRARY {
 
     script:
     """
-    python ${projectDir}/tools/spice_library_scripts/filter_library.py \
+    filter_library.py \
     --library_dir ${library_dir}
     """
 }
@@ -79,7 +79,7 @@ process FINISH_LIBRARY_INITIALIZATION {
 
     script:
     """
-    python ${projectDir}/tools/spice_library_scripts/finish_setup.py \
+    finish_setup.py \
     --library_dir ${library_dir}
     """
 }

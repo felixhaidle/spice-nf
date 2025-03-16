@@ -1,4 +1,3 @@
-include { GENERATE_LIBRARY } from '../../modules/local/library/generate_library'
 include { FAS_ANNOTATION } from '../../modules/local/library/generate_library'
 include { GET_DOMAIN_IMPORTANCE } from '../../modules/local/library/generate_library'
 include { RESTRUCTURE_ANNO } from '../../modules/local/library/generate_library'
@@ -52,22 +51,11 @@ workflow LIBRARY_GENERATION {
         )
 
 
-        /*
-        spice_library = GENERATE_LIBRARY(
-            species,
-            release,
-            outdir,
-            test_mode
-        )
-        */
 
-        // Define the input for FAS_ANNOTATION based on test_mode
-        // fasAnno_library_input = test_mode ? file("${projectDir}/tools/SPICE/test_data/Spice_Library/spice_lib_test_homo_sapiens_94_1ee") : finished_library.finished_library_dir
-        fasAnno_library_input = finished_library.finished_library_dir
 
         annotated_library = FAS_ANNOTATION(
             anno_tools,
-            fasAnno_library_input,
+            finished_library.finished_library_dir
 
 
         )
@@ -83,7 +71,7 @@ workflow LIBRARY_GENERATION {
         )
 
 
-        // Channel to read gene IDs from the file
+        // Channel to read gene IDs and resource requirements from the file genes.txt
         genes_ch = restructured_library.genes_txt_ch
         .splitText()
         .map { it.trim().split(' ') }
