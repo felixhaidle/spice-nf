@@ -1,9 +1,9 @@
-include { FAS_ANNOTATION } from '../../modules/local/library/generate_library'
-include { GET_DOMAIN_IMPORTANCE } from '../../modules/local/library/generate_library'
-include { FAS_SCORE_CALCULATION } from '../../modules/local/library/generate_library'
-include { CONCAT_FAS_SCORES } from '../../modules/local/library/generate_library'
-include { SEQUENCE_FILES } from '../../modules/local/library/setup_library'
-include { CREATE_LIBRARY } from '../../modules/local/library/setup_library'
+include { FAS_ANNOTATION } from '../../modules/local/fas_annotation'
+include { GET_DOMAIN_IMPORTANCE } from '../../modules/local/get_domain_importance'
+include { FAS_SCORE_CALCULATION } from '../../modules/local/fas_score_calculation'
+include { CONCAT_FAS_SCORES } from '../../modules/local/concat_fas_scores'
+include { SEQUENCE_FILES } from '../../modules/local/sequence_files'
+include { CREATE_LIBRARY } from '../../modules/local/create_library'
 
 
 workflow LIBRARY_GENERATION {
