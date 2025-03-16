@@ -1,13 +1,9 @@
 include { FAS_ANNOTATION } from '../../modules/local/library/generate_library'
 include { GET_DOMAIN_IMPORTANCE } from '../../modules/local/library/generate_library'
-include { RESTRUCTURE_ANNO } from '../../modules/local/library/generate_library'
 include { FAS_SCORE_CALCULATION } from '../../modules/local/library/generate_library'
 include { CONCAT_FAS_SCORES } from '../../modules/local/library/generate_library'
-include { PARSE_DOMAIN_OUTPUT } from '../../modules/local/library/generate_library'
 include { SEQUENCE_FILES } from '../../modules/local/library/setup_library'
 include { CREATE_LIBRARY } from '../../modules/local/library/setup_library'
-include { FILTER_LIBRARY } from '../../modules/local/library/setup_library'
-include { FINISH_LIBRARY_INITIALIZATION } from '../../modules/local/library/setup_library'
 
 
 workflow LIBRARY_GENERATION {
@@ -39,23 +35,14 @@ workflow LIBRARY_GENERATION {
         )
 
 
-        filter_library = FILTER_LIBRARY(
-            create_library.library_dir
-        )
 
-
-
-
-        finished_library = FINISH_LIBRARY_INITIALIZATION(
-            filter_library.filtered_library_dir
-        )
 
 
 
 
         annotated_library = FAS_ANNOTATION(
             anno_tools,
-            finished_library.finished_library_dir
+            create_library.library_dir
 
 
         )
@@ -65,14 +52,11 @@ workflow LIBRARY_GENERATION {
 
         )
 
-        restructured_library = RESTRUCTURE_ANNO(
-            domain_importance_library.domain_importance_library_ch
 
-        )
 
 
         // Channel to read gene IDs and resource requirements from the file genes.txt
-        genes_ch = restructured_library.genes_txt_ch
+        genes_ch = create_library.genes_txt_ch
         .splitText()
         .map { it.trim().split(' ') }
         .map { tuple(it[0], it[1]) }
@@ -81,7 +65,7 @@ workflow LIBRARY_GENERATION {
 
         fas_scores = FAS_SCORE_CALCULATION(
             genes_ch,
-            restructured_library.restructured_library_ch,
+            domain_importance_library.domain_importance_library_ch,
             anno_tools
             )
 
@@ -92,18 +76,16 @@ workflow LIBRARY_GENERATION {
 
         concatenated_fas_scores_library = CONCAT_FAS_SCORES (
             fas_score_library,
-            restructured_library.restructured_library_ch
-        )
-
-
-        updated_library = concatenated_fas_scores_library.finished_library
-
-        results_directory = PARSE_DOMAIN_OUTPUT(
-            updated_library,
+            domain_importance_library.domain_importance_library_ch,
             outdir
         )
 
+
+
+
+
+
     emit:
-        library = results_directory.spice_library_ch
+        library = concatenated_fas_scores_library.finished_library
 
 }

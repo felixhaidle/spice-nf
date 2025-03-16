@@ -37,6 +37,7 @@ process CREATE_LIBRARY {
 
     output:
         path 'spice_lib_*', emit: library_dir
+        path "spice_lib_*/transcript_data/genes.txt", emit: genes_txt_ch
 
 
     script:
@@ -50,36 +51,13 @@ process CREATE_LIBRARY {
     --species ${species} \
     --release ${release}
 
-
-    """
-}
-
-process FILTER_LIBRARY {
-
-    input:
-        path library_dir
-
-    output:
-        path "${library_dir}", emit: filtered_library_dir
-
-    script:
-    """
     filter_library.py \
-    --library_dir ${library_dir}
-    """
-}
+    --library_dir spice_lib_*
 
-process FINISH_LIBRARY_INITIALIZATION {
-
-    input:
-        path library_dir
-
-    output:
-        path "${library_dir}", emit: finished_library_dir
-
-    script:
-    """
     finish_setup.py \
-    --library_dir ${library_dir}
+    --library_dir spice_lib_*
+
+
     """
 }
+

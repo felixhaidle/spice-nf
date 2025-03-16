@@ -56,31 +56,14 @@ process GET_DOMAIN_IMPORTANCE {
     get_domain_importance.py \
     -i "${annotated_library}/fas_data/annotations.json" \
     -o "${annotated_library}/fas_data/"
-    """
-}
-
-process RESTRUCTURE_ANNO {
-    executor 'local'
-    cpus '1'
-
-    input:
-        path domain_importance_library // Path: Output from previous step
-
-
-    output:
-        path "${domain_importance_library}", emit: restructured_library_ch
-        path "${domain_importance_library}/transcript_data/genes.txt", emit: genes_txt_ch
-
-
-
-    script:
-    """
 
     restructure_anno.py \
-    -i "${domain_importance_library}/fas_data/annotations.json" \
-    -o "${domain_importance_library}/fas_data/architectures"
+    -i "${annotated_library}/fas_data/annotations.json" \
+    -o "${annotated_library}/fas_data/architectures"
     """
 }
+
+
 
 process FAS_SCORE_CALCULATION {
     executor 'slurm'
@@ -150,6 +133,8 @@ process FAS_SCORE_CALCULATION {
 
 process CONCAT_FAS_SCORES {
     executor 'local'
+    publishDir "${outdir}", mode: 'copy'
+
 
     cpus '1'
     memory '6G'
@@ -157,6 +142,7 @@ process CONCAT_FAS_SCORES {
     input:
         path fas_scores_dir
         path spice_library // Directory containing all necessary files
+        val outdir // Output directory path
 
     output:
         path "${spice_library}", emit: finished_library
@@ -237,31 +223,6 @@ process CONCAT_FAS_SCORES {
         echo "FAS score integration completed."
 
     echo "Processing complete. All \$total genes processed."
-
-
-    """
-}
-
-
-process PARSE_DOMAIN_OUTPUT {
-    executor 'local'
-    cpus '1'
-    publishDir "${outdir}", mode: 'copy'
-
-    input:
-        path spice_library // Path: Output from previous step
-        val outdir // Output directory path
-
-
-    output:
-        path "${spice_library}", emit: spice_library_ch
-
-
-
-
-    script:
-    """
-
     parse_domain_out.py \
     -f "${spice_library}/fas_data/forward.domains" \
     -r "${spice_library}/fas_data/reverse.domains" \
