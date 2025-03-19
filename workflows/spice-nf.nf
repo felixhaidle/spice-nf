@@ -6,7 +6,6 @@
 
 
 include { paramsSummaryMap       } from 'plugin/nf-schema'
-
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_spice_nf_pipeline'
 include { LIBRARY_GENERATION     } from '../subworkflows/local/library_generation.nf'
@@ -25,8 +24,8 @@ workflow SPICE_NF {
         anno_tools    // Path: Path to annotation tools file
         outdir        // Path: Output directory for the library
         test_mode     // Boolean: Whether to run in test mode
-        annotation_gtf  
-        peptide_fasta   
+        annotation_gtf
+        peptide_fasta
 
     main:
 

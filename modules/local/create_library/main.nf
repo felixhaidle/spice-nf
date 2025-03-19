@@ -5,6 +5,7 @@ process CREATE_LIBRARY {
         path fasta_file
         val species
         val release
+        path prefixes
 
     output:
         path 'spice_lib_*', emit: library_dir
@@ -23,7 +24,8 @@ process CREATE_LIBRARY {
     --release ${release}
 
     filter_library.py \
-    --library_dir spice_lib_*
+    --library_dir spice_lib_* \
+    --taxon_prefixes "${prefixes}"
 
     finish_setup.py \
     --library_dir spice_lib_*
