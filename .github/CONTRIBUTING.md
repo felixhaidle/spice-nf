@@ -1,9 +1,9 @@
-# BIONF/spice-nf: Contributing Guidelines
+# `BIONF/spice_library_pipeline`: Contributing Guidelines
 
 Hi there!
-Many thanks for taking an interest in improving BIONF/spice-nf.
+Many thanks for taking an interest in improving BIONF/spice_library_pipeline.
 
-We try to manage the required tasks for BIONF/spice-nf using GitHub issues, you probably came to this page when creating one.
+We try to manage the required tasks for BIONF/spice_library_pipeline using GitHub issues, you probably came to this page when creating one.
 Please use the pre-filled template to save time.
 
 However, don't be put off by this template - other more general issues and suggestions are welcome!
@@ -11,10 +11,10 @@ Contributions to the code are even more welcome ;)
 
 ## Contribution workflow
 
-If you'd like to write some code for BIONF/spice-nf, the standard workflow is as follows:
+If you'd like to write some code for BIONF/spice_library_pipeline, the standard workflow is as follows:
 
-1. Check that there isn't already an issue about your idea in the [BIONF/spice-nf issues](https://github.com/BIONF/spice-nf/issues) to avoid duplicating work. If there isn't one already, please create one so that others know you're working on this
-2. [Fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) the [BIONF/spice-nf repository](https://github.com/BIONF/spice-nf) to your GitHub account
+1. Check that there isn't already an issue about your idea in the [BIONF/spice_library_pipeline issues](https://github.com/BIONF/spice_library_pipeline/issues) to avoid duplicating work. If there isn't one already, please create one so that others know you're working on this
+2. [Fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) the [BIONF/spice_library_pipeline repository](https://github.com/BIONF/spice_library_pipeline) to your GitHub account
 3. Make the necessary changes / additions within your forked repository following [Pipeline conventions](#pipeline-contribution-conventions)
 4. Use `nf-core pipelines schema build` and add any new parameters to the pipeline JSON schema (requires [nf-core tools](https://github.com/nf-core/tools) >= 1.10).
 5. Submit a Pull Request against the `dev` branch and wait for the code to be reviewed and merged
@@ -52,19 +52,19 @@ These tests are run both with the latest available version of `Nextflow` and als
 
 :warning: Only in the unlikely and regretful event of a release happening with a bug.
 
-- On your own fork, make a new branch `patch` based on `upstream/master`.
+- On your own fork, make a new branch `patch` based on `upstream/main` or `upstream/master`.
 - Fix the bug, and bump version (X.Y.Z+1).
-- A PR should be made on `master` from patch to directly this particular bug.
+- Open a pull-request from `patch` to `main`/`master` with the changes.
 
 ## Pipeline contribution conventions
 
-To make the BIONF/spice-nf code and processing logic more understandable for new contributors and to ensure quality, we semi-standardise the way the code and other contributions are written.
+To make the `BIONF/spice_library_pipeline` code and processing logic more understandable for new contributors and to ensure quality, we semi-standardise the way the code and other contributions are written.
 
 ### Adding a new step
 
 If you wish to contribute a new step, please use the following coding standards:
 
-1. Define the corresponding input channel into your new process from the expected previous process channel
+1. Define the corresponding input channel into your new process from the expected previous process channel.
 2. Write the process block (see below).
 3. Define the output channel if needed (see below).
 4. Add any new parameters to `nextflow.config` with a default (see below).
@@ -75,7 +75,7 @@ If you wish to contribute a new step, please use the following coding standards:
 
 ### Default values
 
-Parameters should be initialised / defined with default values in `nextflow.config` under the `params` scope.
+Parameters should be initialised / defined with default values within the `params` scope in `nextflow.config`.
 
 Once there, use `nf-core pipelines schema build` to add to `nextflow_schema.json`.
 

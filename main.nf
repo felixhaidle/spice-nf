@@ -1,9 +1,13 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    BIONF/spice-nf
+    BIONF/spice_library_pipeline
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<<<<<<< HEAD
     Github : https://github.com/felixhaidle/spice-nf
+=======
+    Github : https://github.com/BIONF/spice_library_pipeline
+>>>>>>> TEMPLATE
 ----------------------------------------------------------------------------------------
 */
 
@@ -13,9 +17,15 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+<<<<<<< HEAD
 include { SPICE_NF  } from './workflows/spice-nf'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_spice_nf_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_spice_nf_pipeline'
+=======
+include { SPICE_LIBRARY_PIPELINE  } from './workflows/spice_library_pipeline'
+include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_spice_library_pipeline_pipeline'
+include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_spice_library_pipeline_pipeline'
+>>>>>>> TEMPLATE
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     NAMED WORKFLOWS FOR PIPELINE
@@ -25,7 +35,12 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_spic
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
+<<<<<<< HEAD
 workflow BIONF_SPICE_NF {
+=======
+workflow BIONF_SPICE_LIBRARY_PIPELINE {
+
+>>>>>>> TEMPLATE
     take:
         species       // String: Ensembl species name
         release       // Integer: Ensembl release version
@@ -39,6 +54,7 @@ workflow BIONF_SPICE_NF {
     //
     // WORKFLOW: Run pipeline
     //
+<<<<<<< HEAD
     SPICE_NF (
         species,       // String: Ensembl species name
         release,       // Integer: Ensembl release version
@@ -47,6 +63,10 @@ workflow BIONF_SPICE_NF {
         test_mode,
         annotation_gtf, // Path: Path to GTF annotation file
         peptide_fasta   // Path: Path to peptide FASTA file
+=======
+    SPICE_LIBRARY_PIPELINE (
+        samplesheet
+>>>>>>> TEMPLATE
     )
 }
 /*
@@ -79,6 +99,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
+<<<<<<< HEAD
     BIONF_SPICE_NF (
         params.species,
         params.release,
@@ -87,18 +108,22 @@ workflow {
         params.test_mode,     
         params.annotation_gtf,  
         params.peptide_fasta    
+=======
+    BIONF_SPICE_LIBRARY_PIPELINE (
+        PIPELINE_INITIALISATION.out.samplesheet
+>>>>>>> TEMPLATE
     )
     //
     // SUBWORKFLOW: Run completion tasks
     //
     PIPELINE_COMPLETION (
-        params.email,
-        params.email_on_fail,
-        params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
+<<<<<<< HEAD
         params.hook_url
         
+=======
+>>>>>>> TEMPLATE
     )
 }
 
