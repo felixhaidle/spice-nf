@@ -1,4 +1,4 @@
-# BIONF/spice-nf: Output
+# BIONF/spice_library_pipeline: Output
 
 ## Introduction
 

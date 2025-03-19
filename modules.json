@@ -1,6 +1,6 @@
 {
-    "name": "BIONF/spice-nf",
-    "homePage": "https://github.com/BIONF/spice-nf",
+    "name": "BIONF/spice_library_pipeline",
+    "homePage": "https://github.com/BIONF/spice_library_pipeline",
     "repos": {
         "https://github.com/nf-core/modules.git": {
             "modules": {

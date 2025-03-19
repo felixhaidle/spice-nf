@@ -1,9 +1,9 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    BIONF/spice-nf
+    BIONF/spice_library_pipeline
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/BIONF/spice-nf
+    Github : https://github.com/BIONF/spice_library_pipeline
 ----------------------------------------------------------------------------------------
 */
 
@@ -13,9 +13,9 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { SPICE-NF  } from './workflows/spice-nf'
-include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_spice-nf_pipeline'
-include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_spice-nf_pipeline'
+include { SPICE_LIBRARY_PIPELINE  } from './workflows/spice_library_pipeline'
+include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_spice_library_pipeline_pipeline'
+include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_spice_library_pipeline_pipeline'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     NAMED WORKFLOWS FOR PIPELINE
@@ -25,7 +25,7 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_spic
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
-workflow BIONF_SPICE-NF {
+workflow BIONF_SPICE_LIBRARY_PIPELINE {
 
     take:
     samplesheet // channel: samplesheet read in from --input
@@ -35,7 +35,7 @@ workflow BIONF_SPICE-NF {
     //
     // WORKFLOW: Run pipeline
     //
-    SPICE-NF (
+    SPICE_LIBRARY_PIPELINE (
         samplesheet
     )
 }
@@ -63,7 +63,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    BIONF_SPICE-NF (
+    BIONF_SPICE_LIBRARY_PIPELINE (
         PIPELINE_INITIALISATION.out.samplesheet
     )
     //

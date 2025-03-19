@@ -1,5 +1,5 @@
 //
-// Subworkflow with functionality specific to the BIONF/spice-nf pipeline
+// Subworkflow with functionality specific to the BIONF/spice_library_pipeline pipeline
 //
 
 /*

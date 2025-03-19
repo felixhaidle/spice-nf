@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/BIONF/spice-nf/master/nextflow_schema.json",
-    "title": "BIONF/spice-nf pipeline parameters",
+    "$id": "https://raw.githubusercontent.com/BIONF/spice_library_pipeline/master/nextflow_schema.json",
+    "title": "BIONF/spice_library_pipeline pipeline parameters",
     "description": "Nextflow pipeline to create SPICE libraries",
     "type": "object",
     "$defs": {
