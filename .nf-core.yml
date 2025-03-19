@@ -66,7 +66,7 @@ lint:
 
 template:
   org: BIONF
-  name: spice_nf
+  name: spice_library_pipeline
   description: Nextflow pipeline to create SPICE libraries
   author: Felix Haidle
   version: 1.0.0dev
