@@ -34,12 +34,12 @@ lint:
   - validation.help.afterText
   - validation.summary.beforeText
   - validation.summary.afterText
-nf_core_version: 3.0.2
+nf_core_version: 3.2.0
 org_path: null
 repository_type: pipeline
 template:
-  author: "Felix Hadle, Christian Bl\xFCmel, Julian Dosch, Ingo Ebersberger"
-  description: Nextflow implementation of the SPLICE algorithm
+  author: "Felix Haidle"
+  description: Nextflow pipeline to create SPICE libraries
   force: true
   is_nfcore: false
   name: spice-nf
@@ -52,5 +52,10 @@ template:
   - multiqc
   - fastqc
   - seqera_platform
+  - slackreport
+  - adaptivecard
+  - email
+  - github_badges
+  - ci
   version: 1.0.0dev
 update: null
