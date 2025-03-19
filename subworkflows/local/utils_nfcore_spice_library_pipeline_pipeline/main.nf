@@ -29,11 +29,9 @@ workflow PIPELINE_INITIALISATION {
     monochrome_logs   // boolean: Do not use coloured log outputs
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
-    input             //  string: Path to input samplesheet
     species       // string: Species name (e.g., "human", "mouse")
     release       // string: Ensembl release (e.g., "GRCh38")
     anno_tools    // string: path to FAS anno tools
-    test_mode     // Boolean: indicating test mode
     annotation_gtf
     peptide_fasta
 

@@ -13,7 +13,6 @@ workflow LIBRARY_GENERATION {
         release
         anno_tools
         outdir
-        test_mode
         annotation_gtf
         peptide_fasta
 
@@ -22,7 +21,6 @@ workflow LIBRARY_GENERATION {
         sequence_files = SEQUENCE_FILES(
             species,
             release,
-            test_mode,
             annotation_gtf,
             peptide_fasta
         )
