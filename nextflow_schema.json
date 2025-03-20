@@ -31,8 +31,7 @@
                     "description": "Ensembl genome release version (e.g., '113').",
                     "help_text": "Specify the Ensembl release version for the genome (e.g., 113).",
                     "minimum": 1,
-                    "fa_icon": "fas fa-calendar-alt",
-                    "default": 113
+                    "fa_icon": "fas fa-calendar-alt"
                 },
                 "anno_tools": {
                     "type": "string",
@@ -40,8 +39,7 @@
                     "exists": true,
                     "description": "Path to the directory containing annotation tool files.",
                     "help_text": "Specify the path to the directory where the annotation tool files are stored. Each file in the directory should describe a tool (e.g., ToolName:ToolVersion).",
-                    "fa_icon": "fas fa-folder-open",
-                    "default": "default"
+                    "fa_icon": "fas fa-folder-open"
                 },
                 "annotation_gtf": {
                     "type": "string",
