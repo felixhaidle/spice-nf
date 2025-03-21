@@ -1,24 +1,27 @@
-process FAS_SCORE_CALCULATION {
-    executor 'slurm'
-    maxForks 10
-    queue 'all'
-    cpus { ext.resources[requirements].cpus }
-    memory { ext.resources[requirements].memory }
-    time { ext.resources[requirements].time }
 
+
+process FAS_SCORING {
     tag "$gene_id"
+    label 'process_low'
+
 
 
     input:
-        tuple(val(gene_id),val(requirements)) // Each gene ID from genes.txt with added size
-        path spice_library // Directory containing all necessary files
-        path anno_tools //path to annotools.txt
-
+    each  gene_id
+    path spice_library
+    path anno_tools
 
     output:
-        path "fas_scores/*", emit: fas_scored_directories, optional: true
+    path "fas_scores/*"           , emit: fas_scored_directories, optional: true
+    path "versions.yml"           , emit: versions
+
+    when:
+    task.ext.when == null || task.ext.when
 
     script:
+    def args = task.ext.args ?: ''
+
+
     """
     # Ensure output directory exists
     mkdir -p "fas_scores"
@@ -53,7 +56,8 @@ process FAS_SCORE_CALCULATION {
             --empty_as_1 \
             --featuretypes "${spice_library}/fas_data/annoTools.txt" \
             --toolPath "${anno_tools}" \
-            --cpus ${task.cpus}
+            --cpus ${task.cpus} \
+            ${args}
 
         echo "Finished: FAS analysis for gene ${gene_id}"
 
@@ -61,5 +65,25 @@ process FAS_SCORE_CALCULATION {
         echo "Pairwise TSV file not found for gene ${gene_id}. Skipping FAS analysis."
     fi
 
-        """
-    }
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        greedyFas: \$(pip show greedyFAS | awk '/^Version:/ {print \$2}')
+        python: \$(python --version | awk '{print \$2}'))
+    END_VERSIONS
+    """
+
+    stub:
+    def args = task.ext.args ?: ''
+
+
+    """
+
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        greedyFas: \$(pip show greedyFAS | awk '/^Version:/ {print \$2}')
+        python: \$(python --version | awk '{print \$2}'))
+    END_VERSIONS
+    """
+}
