@@ -166,5 +166,77 @@
         {
             "$ref": "#/$defs/generic_options"
         }
-    ]
+    ],
+    "properties": {
+        "fas_doAnno_eFeature": {
+            "type": "string",
+            "description": "E-value cutoff for PFAM/SMART domains in annotation. Default: 0.001"
+        },
+        "fas_doAnno_eInstance": {
+            "type": "string",
+            "description": "E-value cutoff for PFAM/SMART domain instances. Default: 0.01"
+        },
+        "fas_doAnno_hmmCores": {
+            "type": "string",
+            "description": "Number of CPUs dedicated to HMMER-based domain search (Pfam/SMART)"
+        },
+        "fas_doAnno_eFlps": {
+            "type": "string",
+            "description": "E-value cutoff for fLPS domain annotation. Default: 1e-7"
+        },
+        "fas_doAnno_org": {
+            "type": "string",
+            "enum": ["euk", "gram+", "gram-"],
+            "description": "Organism type used for SignalP annotation"
+        },
+
+        "fas_run_eFeature": {
+            "type": "string",
+            "description": "E-value cutoff for PFAM/SMART domains in FAS scoring. Default: 0.001"
+        },
+        "fas_run_eInstance": {
+            "type": "string",
+            "description": "E-value cutoff for domain instances in FAS scoring. Default: 0.01"
+        },
+        "fas_run_eFlps": {
+            "type": "string",
+            "description": "E-value cutoff for fLPS in FAS scoring. Default: 1e-7"
+        },
+        "fas_run_org": {
+            "type": "string",
+            "enum": ["euk", "gram+", "gram-"],
+            "description": "Organism type used during SignalP-based scoring"
+        },
+        "fas_run_ref_proteome": {
+            "type": "string",
+            "format": "file-path",
+            "description": "Path to reference proteome used for weighting features"
+        },
+        "fas_run_weight_correction": {
+            "type": "string",
+            "enum": ["linear", "loge", "log10", "root4", "root8"],
+            "description": "Weighting function for feature frequencies in scoring"
+        },
+        "fas_run_max_overlap_percentage": {
+            "type": "string",
+            "description": "Maximum percentage overlap allowed between features. Default: 0.4"
+        },
+        "fas_run_priority_threshold": {
+            "type": "string",
+            "description": "Threshold to activate priority mode for dense feature architectures. Default: 30"
+        },
+        "fas_run_max_cardinality": {
+            "type": "string",
+            "description": "Maximum number of feature paths allowed before triggering fallback strategies. Default: 500"
+        },
+        "fas_run_paths_limit": {
+            "type": "string",
+            "description": "Path complexity limit (as 10^n). Default: 0 (no limit)"
+        },
+        "fas_run_score_weights": {
+            "type": "string",
+            "description": "Three space-separated floats defining weights for MS, CS, and PS scores. Example: '0.7 0.0 0.3'"
+        }
+
+    }
 }

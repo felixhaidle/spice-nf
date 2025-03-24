@@ -52,7 +52,8 @@ workflow SPICE_LIBRARY_PIPELINE {
             sequence_files.fasta_file,
             species,
             release,
-            prefixes
+            prefixes,
+            anno_tools
         )
         ch_versions = ch_versions.mix(LIBRARY_INITIALIZATION.out.versions)
 

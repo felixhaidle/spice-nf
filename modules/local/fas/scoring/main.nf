@@ -2,7 +2,7 @@
 
 process FAS_SCORING {
     tag "$gene_id"
-    label 'process_low'
+    label 'fas_scoring'
 
 
 

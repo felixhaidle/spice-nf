@@ -1,7 +1,7 @@
 
 
 process LIBRARY_INITIALIZATION {
-    label 'process_low'
+    label 'process_single'
 
 
 
@@ -11,6 +11,7 @@ process LIBRARY_INITIALIZATION {
     val species
     val release
     path prefixes
+    path anno_tools
 
     output:
     path 'spice_lib_*'                          , emit: library_dir
@@ -31,7 +32,8 @@ process LIBRARY_INITIALIZATION {
     --gtf_path ${gtf_file} \
     --fasta_path ${fasta_file} \
     --species ${species} \
-    --release ${release}
+    --release ${release} \
+    --modefas "${anno_tools}/annoTools.txt"
 
     filter_library.py \
     --library_dir spice_lib_* \

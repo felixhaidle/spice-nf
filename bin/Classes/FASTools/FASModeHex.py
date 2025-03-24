@@ -31,7 +31,7 @@ class FASModeHex:
 
     def __init__(self,
                  mode_byte_count: int = 3,
-                 mode_tuple: Tuple[str] = ("#linearized", "Pfam", "#normal",
+                 mode_tuple: Tuple[str] = ("#linearized", "Pfam", "SMART", "#normal",
                                            "fLPS", "COILS2", "SEG",
                                            "SignalP", "TMHMM", "#checked")):
         self.mode_byte_count: int = mode_byte_count

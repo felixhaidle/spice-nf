@@ -1,7 +1,7 @@
 
 
 process LIBRARY_RESTRUCTURE {
-    label 'process_low'
+    label 'process_single'
 
 
     input:
