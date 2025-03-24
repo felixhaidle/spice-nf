@@ -42,7 +42,19 @@ process FAS_ANNOTATION {
     "${task.process}":
         greedyFas: \$(pip show greedyFAS | awk '/^Version:/ {print \$2}')
     END_VERSIONS
+
+    # Append tool versions from annotations.json to versions.yml
+    python3 - <<EOF >> versions.yml
+    import json
+    with open("${spice_library_dir}/fas_data/annotations.json") as f:
+        data = json.load(f)
+        versions = data.get("version", {})
+        for tool, info in versions.items():
+            version = info.get("version", "NA") if isinstance(info, dict) else "NA"
+            print(f"    {tool}: {version}")
+    EOF
     """
+
 
     stub:
     def args = task.ext.args ?: ''
@@ -55,5 +67,16 @@ process FAS_ANNOTATION {
     "${task.process}":
         greedyFas: \$(pip show greedyFAS | awk '/^Version:/ {print \$2}')
     END_VERSIONS
+
+    # Append tool versions from annotations.json to versions.yml
+    python3 - <<EOF >> versions.yml
+    import json
+    with open("${spice_library_dir}/fas_data/annotations.json") as f:
+        data = json.load(f)
+        versions = data.get("version", {})
+        for tool, info in versions.items():
+            version = info.get("version", "NA") if isinstance(info, dict) else "NA"
+            print(f"    {tool}: {version}")
+    EOF
     """
 }
