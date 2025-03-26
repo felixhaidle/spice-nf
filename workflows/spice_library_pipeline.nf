@@ -34,22 +34,32 @@ workflow SPICE_LIBRARY_PIPELINE {
     main:
 
         ch_versions = Channel.empty()
+        gtf_file_ch = Channel.empty()
+        fasta_file_ch = Channel.empty()
 
-        // Run library generation
-        sequence_files = SEQUENCES(
-            species,
-            release,
-            annotation_gtf,
-            peptide_fasta
-        )
+        def gtf_exists = annotation_gtf && file(annotation_gtf).exists()
+        def fasta_exists = peptide_fasta && file(peptide_fasta).exists()
 
+
+        if (!gtf_exists || !fasta_exists) {
+            sequence_files = SEQUENCES(
+                species,
+                release
+            )
+
+            gtf_file_ch = sequence_files.gtf_file
+            fasta_file_ch = sequence_files.fasta_file
+        } else {
+            gtf_file_ch = channel.fromPath(annotation_gtf)
+            fasta_file_ch = channel.fromPath(peptide_fasta)
+        }
 
 
         prefixes = channel.fromPath("${projectDir}/assets/ensembl_stable_id_prefixes.json")
 
         create_library = LIBRARY_INITIALIZATION(
-            sequence_files.gtf_file,
-            sequence_files.fasta_file,
+            gtf_file_ch,
+            fasta_file_ch,
             species,
             release,
             prefixes,
