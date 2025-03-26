@@ -33,7 +33,8 @@ process LIBRARY_INITIALIZATION {
     --fasta_path ${fasta_file} \
     --species ${species} \
     --release ${release} \
-    --modefas "${anno_tools}/annoTools.txt"
+    --modefas ${anno_tools}
+
 
     filter_library.py \
     --library_dir spice_lib_* \
@@ -41,6 +42,7 @@ process LIBRARY_INITIALIZATION {
 
     finish_setup.py \
     --library_dir spice_lib_*
+
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

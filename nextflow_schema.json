@@ -10,7 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["outdir", "anno_tools", "species", "release"],
+            "required": ["outdir", "species", "release", "anno_tools"],
             "properties": {
                 "outdir": {
                     "type": "string",
@@ -54,54 +54,95 @@
                     "description": "Path to the peptide FASTA file.",
                     "fa_icon": "fas fa-file-alt",
                     "help_text": "Provide the path to the peptide FASTA file if available. This parameter is optional."
+                },
+                "exclude_anno": {
+                    "type": "string",
+                    "description": "Annotation tools that should NOT be used for the FAS annotation",
+                    "pattern": "^([a-zA-Z0-9_+-]+)(,[a-zA-Z0-9_+-]+)*$"
                 }
             }
         },
-        "institutional_config_options": {
-            "title": "Institutional config options",
+        "fas_doanno_options": {
+            "title": "fas.doAnno options",
             "type": "object",
-            "fa_icon": "fas fa-university",
-            "description": "Parameters used to describe centralised config profiles. These should not be edited.",
-            "help_text": "The centralised nf-core configuration profiles use a handful of pipeline parameters to describe themselves. This information is then printed to the Nextflow log when you run a pipeline. You should not need to change these values when you run a pipeline.",
+            "description": "Optional parameters that can be used to adjust the FAS annotation",
+            "default": "",
             "properties": {
-                "custom_config_version": {
+                "fas_doAnno_eInstance": {
                     "type": "string",
-                    "description": "Git commit id for Institutional configs.",
-                    "default": "master",
-                    "hidden": true,
-                    "fa_icon": "fas fa-users-cog"
+                    "description": "E-value cutoff for PFAM/SMART domain instances. Default: 0.01"
                 },
-                "custom_config_base": {
+                "fas_doAnno_hmmCores": {
                     "type": "string",
-                    "description": "Base directory for Institutional configs.",
-                    "default": "https://raw.githubusercontent.com/nf-core/configs/master",
-                    "hidden": true,
-                    "help_text": "If you're running offline, Nextflow will not be able to fetch the institutional config files from the internet. If you don't need them, then this is not a problem. If you do need them, you should download the files from the repo and tell Nextflow where to find them with this parameter.",
-                    "fa_icon": "fas fa-users-cog"
+                    "description": "Number of CPUs dedicated to HMMER-based domain search (Pfam/SMART)"
                 },
-                "config_profile_name": {
+                "fas_doAnno_eFlps": {
                     "type": "string",
-                    "description": "Institutional config name.",
-                    "hidden": true,
-                    "fa_icon": "fas fa-users-cog"
+                    "description": "E-value cutoff for fLPS domain annotation. Default: 1e-7"
                 },
-                "config_profile_description": {
+                "fas_doAnno_org": {
                     "type": "string",
-                    "description": "Institutional config description.",
-                    "hidden": true,
-                    "fa_icon": "fas fa-users-cog"
+                    "enum": ["euk", "gram+", "gram-"],
+                    "description": "Organism type used for SignalP annotation"
                 },
-                "config_profile_contact": {
+                "fas_doAnno_eFeature": {
                     "type": "string",
-                    "description": "Institutional config contact information.",
-                    "hidden": true,
-                    "fa_icon": "fas fa-users-cog"
+                    "description": "E-value cutoff for PFAM/SMART domains in annotation. Default: 0.001"
+                }
+            }
+        },
+        "fas_run_options": {
+            "title": "fas.run options",
+            "type": "object",
+            "description": "Optional parameters to adjust the FAS scoring",
+            "default": "",
+            "properties": {
+                "fas_run_eInstance": {
+                    "type": "string",
+                    "description": "E-value cutoff for domain instances in FAS scoring. Default: 0.01"
                 },
-                "config_profile_url": {
+                "fas_run_eFlps": {
                     "type": "string",
-                    "description": "Institutional config URL link.",
-                    "hidden": true,
-                    "fa_icon": "fas fa-users-cog"
+                    "description": "E-value cutoff for fLPS in FAS scoring. Default: 1e-7"
+                },
+                "fas_run_eFeature": {
+                    "type": "string",
+                    "description": "E-value cutoff for PFAM/SMART domains in FAS scoring. Default: 0.001"
+                },
+                "fas_run_org": {
+                    "type": "string",
+                    "enum": ["euk", "gram+", "gram-"],
+                    "description": "Organism type used during SignalP-based scoring"
+                },
+                "fas_run_weight_correction": {
+                    "type": "string",
+                    "enum": ["linear", "loge", "log10", "root4", "root8"],
+                    "description": "Weighting function for feature frequencies in scoring"
+                },
+                "fas_run_ref_proteome": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Path to reference proteome used for weighting features"
+                },
+                "fas_run_priority_threshold": {
+                    "type": "string",
+                    "description": "Threshold to activate priority mode for dense feature architectures. Default: 30"
+                },
+                "fas_run_max_cardinality": {
+                    "type": "string",
+                    "description": "Maximum number of feature paths allowed before triggering fallback strategies. Default: 500"
+                },
+                "fas_run_score_weights": {
+                    "type": "string",
+                    "description": "Three space-separated floats defining weights for MS, CS, and PS scores. Example: '0.7 0.0 0.3'"
+                },
+                "fas_run_paths_limit": {
+                    "type": "string",
+                    "description": "Path complexity limit (as 10^n). Default: 0 (no limit)"
+                },
+                "fas_run_max_overlap_percentage": {
+                    "type": "string",
+                    "description": "Maximum percentage overlap allowed between features. Default: 0.4"
                 }
             }
         },
@@ -154,6 +195,54 @@
                     "hidden": true
                 }
             }
+        },
+        "institutional_config_options": {
+            "title": "Institutional config options",
+            "type": "object",
+            "fa_icon": "fas fa-university",
+            "description": "Parameters used to describe centralised config profiles. These should not be edited.",
+            "help_text": "The centralised nf-core configuration profiles use a handful of pipeline parameters to describe themselves. This information is then printed to the Nextflow log when you run a pipeline. You should not need to change these values when you run a pipeline.",
+            "properties": {
+                "custom_config_version": {
+                    "type": "string",
+                    "description": "Git commit id for Institutional configs.",
+                    "default": "master",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "custom_config_base": {
+                    "type": "string",
+                    "description": "Base directory for Institutional configs.",
+                    "default": "https://raw.githubusercontent.com/nf-core/configs/master",
+                    "hidden": true,
+                    "help_text": "If you're running offline, Nextflow will not be able to fetch the institutional config files from the internet. If you don't need them, then this is not a problem. If you do need them, you should download the files from the repo and tell Nextflow where to find them with this parameter.",
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "config_profile_name": {
+                    "type": "string",
+                    "description": "Institutional config name.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "config_profile_description": {
+                    "type": "string",
+                    "description": "Institutional config description.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "config_profile_contact": {
+                    "type": "string",
+                    "description": "Institutional config contact information.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "config_profile_url": {
+                    "type": "string",
+                    "description": "Institutional config URL link.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                }
+            }
         }
     },
     "allOf": [
@@ -161,82 +250,23 @@
             "$ref": "#/$defs/input_output_options"
         },
         {
-            "$ref": "#/$defs/institutional_config_options"
+            "$ref": "#/$defs/fas_doanno_options"
+        },
+        {
+            "$ref": "#/$defs/fas_run_options"
         },
         {
             "$ref": "#/$defs/generic_options"
+        },
+        {
+            "$ref": "#/$defs/institutional_config_options"
         }
     ],
     "properties": {
-        "fas_doAnno_eFeature": {
+        "input": {
             "type": "string",
-            "description": "E-value cutoff for PFAM/SMART domains in annotation. Default: 0.001"
-        },
-        "fas_doAnno_eInstance": {
-            "type": "string",
-            "description": "E-value cutoff for PFAM/SMART domain instances. Default: 0.01"
-        },
-        "fas_doAnno_hmmCores": {
-            "type": "string",
-            "description": "Number of CPUs dedicated to HMMER-based domain search (Pfam/SMART)"
-        },
-        "fas_doAnno_eFlps": {
-            "type": "string",
-            "description": "E-value cutoff for fLPS domain annotation. Default: 1e-7"
-        },
-        "fas_doAnno_org": {
-            "type": "string",
-            "enum": ["euk", "gram+", "gram-"],
-            "description": "Organism type used for SignalP annotation"
-        },
-
-        "fas_run_eFeature": {
-            "type": "string",
-            "description": "E-value cutoff for PFAM/SMART domains in FAS scoring. Default: 0.001"
-        },
-        "fas_run_eInstance": {
-            "type": "string",
-            "description": "E-value cutoff for domain instances in FAS scoring. Default: 0.01"
-        },
-        "fas_run_eFlps": {
-            "type": "string",
-            "description": "E-value cutoff for fLPS in FAS scoring. Default: 1e-7"
-        },
-        "fas_run_org": {
-            "type": "string",
-            "enum": ["euk", "gram+", "gram-"],
-            "description": "Organism type used during SignalP-based scoring"
-        },
-        "fas_run_ref_proteome": {
-            "type": "string",
-            "format": "file-path",
-            "description": "Path to reference proteome used for weighting features"
-        },
-        "fas_run_weight_correction": {
-            "type": "string",
-            "enum": ["linear", "loge", "log10", "root4", "root8"],
-            "description": "Weighting function for feature frequencies in scoring"
-        },
-        "fas_run_max_overlap_percentage": {
-            "type": "string",
-            "description": "Maximum percentage overlap allowed between features. Default: 0.4"
-        },
-        "fas_run_priority_threshold": {
-            "type": "string",
-            "description": "Threshold to activate priority mode for dense feature architectures. Default: 30"
-        },
-        "fas_run_max_cardinality": {
-            "type": "string",
-            "description": "Maximum number of feature paths allowed before triggering fallback strategies. Default: 500"
-        },
-        "fas_run_paths_limit": {
-            "type": "string",
-            "description": "Path complexity limit (as 10^n). Default: 0 (no limit)"
-        },
-        "fas_run_score_weights": {
-            "type": "string",
-            "description": "Three space-separated floats defining weights for MS, CS, and PS scores. Example: '0.7 0.0 0.3'"
+            "description": "Not used in this pipeline",
+            "hidden": true
         }
-
     }
 }

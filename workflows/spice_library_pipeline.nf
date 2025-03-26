@@ -13,6 +13,7 @@ include { CONCAT_FAS_SCORES      } from '../modules/local/concat'
 include { SEQUENCES              } from '../modules/local/sequences'
 include { LIBRARY_INITIALIZATION } from '../modules/local/initialization'
 include { LIBRARY_RESTRUCTURE    } from '../modules/local/restructure'
+include { TOOLS                  } from '../modules/local/tools'
 
 
 /*
@@ -28,12 +29,20 @@ workflow SPICE_LIBRARY_PIPELINE {
         release         // Integer: Ensembl release version
         anno_tools      // Path: Path to annotation tools file
         outdir          // Path: Output directory for the library
-        annotation_gtf
-        peptide_fasta
+        annotation_gtf  // Path: Path to a .gtf file
+        peptide_fasta   // PAth: PAth to a .fasta file
 
     main:
+        //
+        // Initialize channel to track the versions of the used software
+        //
 
         ch_versions = Channel.empty()
+
+        //
+        // Logic to use either supplied annotation and fasta file or download them
+        //
+
         gtf_file_ch = Channel.empty()
         fasta_file_ch = Channel.empty()
 
@@ -54,8 +63,35 @@ workflow SPICE_LIBRARY_PIPELINE {
             fasta_file_ch = channel.fromPath(peptide_fasta)
         }
 
+        //
+        // Load the file with the ENSEMBL stable ID prefixes
+        //
 
         prefixes = channel.fromPath("${projectDir}/assets/ensembl_stable_id_prefixes.json")
+
+        //
+        // Update annoTools.txt if there is the user input to exclude an annotation tool
+        //
+
+        anno_tools_ch = Channel.empty()
+
+        if (params.exclude_anno) {
+            updated_anno_tools_ch = TOOLS(
+                channel.fromPath("${anno_tools}/annoTools.txt"),
+                params.exclude_anno
+            )
+
+            anno_tools_ch = updated_anno_tools_ch.anno_file
+            ch_versions = ch_versions.mix(TOOLS.out.versions)
+
+        } else {
+            anno_tools_ch = channel.fromPath("${anno_tools}/annoTools.txt")
+        }
+
+
+        //
+        // Library generation logic
+        //
 
         create_library = LIBRARY_INITIALIZATION(
             gtf_file_ch,
@@ -63,7 +99,7 @@ workflow SPICE_LIBRARY_PIPELINE {
             species,
             release,
             prefixes,
-            anno_tools
+            anno_tools_ch
         )
         ch_versions = ch_versions.mix(LIBRARY_INITIALIZATION.out.versions)
 
@@ -79,7 +115,10 @@ workflow SPICE_LIBRARY_PIPELINE {
         )
         ch_versions = ch_versions.mix(LIBRARY_RESTRUCTURE.out.versions)
 
+        //
         // Channel to read gene IDs and resource requirements from the file genes.txt
+        //
+
         genes_ch = create_library.genes_txt_ch
         .splitText()
         .map { it.trim().split(' ') }

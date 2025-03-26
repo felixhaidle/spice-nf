@@ -22,9 +22,6 @@ process FAS_ANNOTATION {
 
 
     """
-    # Replace annoTools.txt in spice_library_dir with the one from anno_tools
-    cp "${anno_tools}/annoTools.txt" "${spice_library_dir}/fas_data/annoTools.txt"
-
 
     # run the annotaion
     source "${anno_tools}/fas.profile"
