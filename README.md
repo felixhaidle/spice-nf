@@ -18,10 +18,14 @@ It is roughly divided into the following steps:
 
 ## Usage
 
+Below is the general installation/setup/usage explanation. If you are from AK Ebersberger please refer to the AKE usage documentation.
+
+### Install FAS
+
 SPICE heavily relies on **FAS** to function, as the FAS algorithm estimates transcript (dis)similarities.
 
 FAS itself depends on various annotation tools, which cannot be bundled with this pipeline.
-You must first follow the instructions here: https://github.com/BIONF/FAS.
+You must first follow the instructions [here](https://github.com/BIONF/FAS) to set it up.
 
 Make sure the following command runs successfully in the environment where you will execute the pipeline (e.g., when submitting a job via SLURM):
 
@@ -29,6 +33,7 @@ Make sure the following command runs successfully in the environment where you w
 fas.doAnno -i test_annofas.fa -o test_output
 ```
 
+### Set up the pipeline
 As this pipeline is not part of nf-core, you first need to clone the repository:
 
 ```bash
@@ -70,7 +75,7 @@ nextflow run BIONF/spice_library_pipeline \
 | `--anno_tools`    | Path to the installed annotation tools directory (equivalent to the `-t` parameter in `fas.setup`). |
 | `--outdir`        | Output directory for pipeline results. Will be created if it doesn't exist.  |
 
-A full overview of all available parameters can be found in [`parameters.md`](assets/parameters.md).
+A full overview of all available parameters can be found in [`parameters.md`](docs/parameters.md).
 
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or the Nextflow `-params-file` option.
