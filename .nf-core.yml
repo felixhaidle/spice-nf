@@ -75,4 +75,5 @@ template:
     - email
     - github_badges
     - ci
+    - rocrate
   version: 1.0.0dev

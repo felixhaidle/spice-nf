@@ -33,6 +33,7 @@ workflow SPICE_LIBRARY_PIPELINE {
         peptide_fasta   // PAth: PAth to a .fasta file
 
     main:
+
         //
         // Initialize channel to track the versions of the used software
         //
