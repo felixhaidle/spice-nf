@@ -28,93 +28,174 @@ from pathlib import Path
 
 
 def option_parse():
-    parser = argparse.ArgumentParser(epilog="This script restructures the annotation file format into a mapped version where each feature instance of a protein gets an id. This is to make saving linearized architectures less data heavy.")
+    """
+    Parses command-line arguments and calls the main processing function.
+
+    Required Arguments:
+    -f / --forwardPath: Path to _forward.domains file.
+    -r / --reversePath: Path to _reverse.domains file.
+    -m / --mapPath: Path to the feature mapping JSON directory.
+    -o / --outPath: Output directory for processed JSON output.
+    """
+    parser = argparse.ArgumentParser(
+        epilog="This script restructures the annotation file format into a mapped version "
+               "where each feature instance of a protein gets an ID. This is to make saving "
+               "linearized architectures less data heavy."
+    )
     required = parser.add_argument_group('required arguments')
-    optional = parser.add_argument_group('optional arguments')
-    required.add_argument("-f", "--forwardPath", default='.', type=str, required=True,
-                          help="path to _forward.domains")
-    required.add_argument("-r", "--reversePath", default='.', type=str, required=True,
-                          help="path to _reverse.domains")
-    required.add_argument("-m", "--mapPath", default='.', type=str, required=True,
-                          help="path to feature mapping json")
-    required.add_argument("-o", "--outPath", default='.', type=str, required=True,
-                          help="path to output directory.")
+
+    required.add_argument("-f", "--forwardPath", type=str, required=True,
+                          help="Path to _forward.domains file.")
+    required.add_argument("-r", "--reversePath", type=str, required=True,
+                          help="Path to _reverse.domains file.")
+    required.add_argument("-m", "--mapPath", type=str, required=True,
+                          help="Path to feature mapping JSON directory.")
+    required.add_argument("-o", "--outPath", type=str, required=True,
+                          help="Path to output directory.")
+
     args = parser.parse_args()
     main(args.forwardPath, args.reversePath, args.mapPath, args.outPath)
 
+
 def main(forwardpath, reversepath, mappath, outpath):
-    with open(mappath + '/index.json', 'r') as infile:
+    """
+    Loads the index from the mapping directory and calls the input reader.
+
+    Args:
+        forwardpath (str): Path to _forward.domains file.
+        reversepath (str): Path to _reverse.domains file.
+        mappath (str): Path to directory containing index.json and mapping files.
+        outpath (str): Output directory for resulting JSON files.
+    """
+    with open(f"{mappath}/index.json", 'r') as infile:
         files = json.loads(infile.read())['#files']
     read_input((forwardpath, reversepath), mappath, files, outpath)
 
+
 def save2json(dict2save, name, directory):
+    """
+    Saves a dictionary to a JSON file in the specified directory.
+
+    Args:
+        dict2save (dict): Data to save.
+        name (str): Name of the output file (without extension).
+        directory (str): Output directory.
+    """
     Path(directory).mkdir(parents=True, exist_ok=True)
     jsonOut = json.dumps(dict2save, ensure_ascii=False)
-    with open(directory + '/' + name + '.json', 'w') as out:
-        out.write(jsonOut)  
+    with open(f"{directory}/{name}.json", 'w') as out:
+        out.write(jsonOut)
+
 
 def read_input(inpaths, mappath, files, outpath):
-    for i in [0, 1]:
+    """
+    Processes the forward and reverse domain files to create feature path mappings
+    for each gene using the provided mapping files.
+
+    Args:
+        inpaths (tuple): Tuple of paths to (forward.domains, reverse.domains).
+        mappath (str): Directory containing mapping JSON files.
+        files (int): Number of mapping files to iterate through.
+        outpath (str): Directory to write the output JSON files.
+    """
+    for i in [0, 1]:  # 0 = forward, 1 = reverse
         with open(inpaths[i], 'r') as infile:
             lines = infile.readlines()
-        index2 = {}
+
+        index2 = {}     # Maps gene ID to (start, end) line indices in the domains file
         y = 0
         current = None
+
+        # Parse domain lines to find ranges for each gene
         for line in lines:
             if line == '\n' or line.startswith('#'):
                 y += 1
                 continue
+
             gid = line.split('|')[0]
-            if not gid in index2:
+
+            if gid not in index2:
                 index2[gid] = [y]
-            if current and not gid == current:
+
+            if current and gid != current:
                 index2[current].append(y)
                 current = gid
+
             if not current:
                 current = gid
+
             y += 1
+
         index2[current].append(y)
-        for index in range(files+1):
-            with open(mappath + '/' + str(index).rjust(9, '0') + '.json', 'r') as infile2:     
+
+        # Process each mapping file
+        for index in range(files + 1):
+            mapfile_path = f"{mappath}/{str(index).rjust(9, '0')}.json"
+            with open(mapfile_path, 'r') as infile2:
                 mapfile = json.loads(infile2.read())
+
             if i == 0:
-                lin = {}
+                lin = {}  # Initialize new output
             else:
-                with open(outpath + '/' + str(index).rjust(9, '0') + '_paths.json', 'r') as pathfile:
+                # Load existing forward results to extend them with reverse data
+                with open(f"{outpath}/{str(index).rjust(9, '0')}_paths.json", 'r') as pathfile:
                     lin = json.loads(pathfile.read())
+
             for gene in mapfile:
                 if gene in index2:
-                    for z in range(index2[gene][0], index2[gene][1]):
+                    start, end = index2[gene]
+                    for z in range(start, end):
                         line = lines[z]
                         cells = line.rstrip('\n').split('\t')
+
                         if line == '\n' or line.startswith('#'):
                             continue
+
+                        # Get protein IDs depending on direction
                         if i == 0:
                             p1, p2 = cells[0].split('#')
                         else:
                             p2, p1 = cells[0].split('#')
+
                         if p1 == p2:
                             continue
+
                         gid, p1, tax = p1.split('|')
                         p2 = p2.split('|')[1]
+
                         if gid not in lin:
                             lin[gid] = {}
+
                         pkey = '@'.join((p1, p2))
+
                         if pkey not in lin[gid]:
                             lin[gid][pkey] = [[], []]
+
                         rp = cells[1].split('|')[1]
+
                         if cells[7] == 'Y':
                             fid = None
                             x = 0
-                            while fid == None:
-                                if mapfile[gid][rp]['fmap'][str(x)][0] == cells[3] and mapfile[gid][rp]['fmap'][str(x)][1] == int(cells[4]) and mapfile[gid][rp]['fmap'][str(x)][2] == int(cells[5]):
+                            # Look up feature ID by matching attributes
+                            while fid is None:
+                                fmap_entry = mapfile[gid][rp]['fmap'][str(x)]
+                                if (
+                                    fmap_entry[0] == cells[3] and
+                                    fmap_entry[1] == int(cells[4]) and
+                                    fmap_entry[2] == int(cells[5])
+                                ):
                                     fid = str(x)
                                 x += 1
+
+                            # Assign feature ID to correct direction
                             if rp == p1:
                                 lin[gid][pkey][0].append(fid)
                             elif rp == p2:
                                 lin[gid][pkey][1].append(fid)
-            save2json(lin, str(index).rjust(9, '0') + '_paths', outpath)
+
+            # Save result for this file
+            save2json(lin, f"{str(index).rjust(9, '0')}_paths", outpath)
+
 
 if __name__ == '__main__':
     option_parse()

@@ -20,67 +20,117 @@
 #
 #######################################################################
 
-
 import argparse
 import json
 import os
 from pathlib import Path
 
-
 def option_parse():
-    parser = argparse.ArgumentParser(epilog="This script restructures the annotation file format into a mapped version where each feature instance of a protein gets an id. This is to make saving linearized architectures less data heavy.")
+    """
+    Parses command-line arguments and triggers the main process.
+
+    Required Arguments:
+    -i / --inPath: Path to the input JSON file.
+    -o / --outPath: Path to the output directory.
+
+    Optional Arguments:
+    -c / --genesPerFile: Number of genes to include in each output file. Default is 100.
+    """
+    parser = argparse.ArgumentParser(
+        epilog="This script restructures the annotation file format into a mapped version where each feature instance "
+               "of a protein gets an ID. This is to make saving linearized architectures less data heavy."
+    )
     required = parser.add_argument_group('required arguments')
     optional = parser.add_argument_group('optional arguments')
+
     required.add_argument("-i", "--inPath", default='.', type=str, required=True,
-                          help="path to input json")
+                          help="Path to input JSON file containing feature annotations.")
     required.add_argument("-o", "--outPath", default='.', type=str, required=True,
-                          help="path to output directory. Name will be based on input file.")
+                          help="Path to output directory. Output filenames are based on the input.")
     optional.add_argument("-c", "--genesPerFile", default=100, type=int, required=False,
-                          help="Number of genes in one file. Higher number result in less file with bigger size. ")
+                          help="Number of genes per output file. Larger number results in fewer, larger files.")
+
     args = parser.parse_args()
     main(args.inPath, args.outPath, args.genesPerFile)
 
 
 def main(inpath, outpath, filesize):
+    """
+    Reads the input file, restructures the annotation data by gene,
+    splits it into smaller JSON files, and creates an index file.
+
+    Args:
+        inpath (str): Path to the input JSON file.
+        outpath (str): Directory where output files will be saved.
+        filesize (int): Number of genes per output file.
+    """
     arc = read_input(inpath)
-    index = 0
-    count = 0
-    output = {}
-    indexout = {'genes': {}}
+    index = 0  # File index counter
+    count = 0  # Gene counter
+    output = {}  # Temp dictionary for batch output
+    indexout = {'genes': {}}  # Mapping from gene ID to output file index
+
     for gene in arc:
         output[gene] = arc[gene]
         indexout['genes'][gene] = index
         count += 1
+
+        # Save current batch if it hits the file size limit
         if count > filesize:
-            name = str(index).rjust(9, '0')
+            name = str(index).rjust(9, '0')  # Padded file name
             save2json(output, name, outpath)
             output = {}
             index += 1
             count = 0
+
+    # Save any remaining genes
     name = str(index).rjust(9, '0')
     save2json(output, name, outpath)
+
+    # Save the index file mapping genes to their output files
     indexout['#files'] = index
     save2json(indexout, 'index', outpath)
 
-    
+
 def save2json(dict2save, name, directory):
+    """
+    Serializes a dictionary to JSON and writes it to a file.
+
+    Args:
+        dict2save (dict): Dictionary to be saved.
+        name (str): Output filename (without extension).
+        directory (str): Output directory path.
+    """
     Path(directory).mkdir(parents=True, exist_ok=True)
     jsonOut = json.dumps(dict2save, ensure_ascii=False)
-    out = open(directory + '/' + name + '.json', 'w')
-    out.write(jsonOut)
-    out.close()
+    with open(f"{directory}/{name}.json", 'w') as out:
+        out.write(jsonOut)
 
 
-def read_input(inpath):    # reads input json that contains the isoform annotations and restructures the data in a gene centric fashion
+def read_input(inpath):
+    """
+    Reads and restructures the input JSON file into a nested gene-centric dictionary.
+
+    Args:
+        inpath (str): Path to the input JSON file.
+
+    Returns:
+        dict: Nested dictionary of structure:
+              {gene_id: {protein_id: {'length': int, 'fmap': {int: (feature_type, start, end)}}}}
+    """
     fa_map = {}
     with open(inpath, 'r') as infile:
         features = json.loads(infile.read())['feature']
+
         for protid in features:
-            gid, pid, tid = protid.split('|')
-            if not gid in fa_map:
+            gid, pid, tid = protid.split('|')  # Extract gene, protein, and transcript IDs
+
+            if gid not in fa_map:
                 fa_map[gid] = {}
-            i = 0
+
             fa_map[gid][pid] = {'fmap': {}}
+            i = 0  # Instance index
+
             for tool in features[protid]:
                 if tool == 'length':
                     fa_map[gid][pid]['length'] = features[protid]['length']
@@ -90,9 +140,7 @@ def read_input(inpath):    # reads input json that contains the isoform annotati
                             fa_map[gid][pid]['fmap'][i] = (feature, instance[0], instance[1])
                             i += 1
     return fa_map
-                        
 
 
 if __name__ == '__main__':
     option_parse()
-

@@ -3,10 +3,13 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+
+// nf-core
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_spice_library_pipeline_pipeline'
 
+// local
 include { FAS_ANNOTATION         } from '../modules/local/fas/annotation'
 include { FAS_SCORING            } from '../modules/local/fas/scoring'
 include { CONCAT_FAS_SCORES      } from '../modules/local/concat'
