@@ -1,8 +1,11 @@
 # BIONF/spice_library_pipeline
 
-## Introduction
+## Acknowledgements & Original Software
 
-The tool **Splicing-based Protein Isoform Comparison Estimator (SPICE)** was created by Christian Blümel. The original implementation can be found in this repository: https://github.com/chrisbluemel/SPICE.
+This pipeline includes adaptations from the **Splicing-based Protein Isoform Comparison Estimator (SPICE)** tool, originally developed by [Christian Blümel](https://github.com/chrisbluemel) and [Julian Dosch](https://github.com/JuRuDo).
+The original SPICE implementation is available at [https://github.com/chrisbluemel/SPICE](https://github.com/chrisbluemel/SPICE) and is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html).
+
+## Introduction
 
 This repository contains a Nextflow-based pipeline to automate the creation of SPICE libraries.
 Instead of running multiple scripts manually, you can now use this streamlined pipeline.
