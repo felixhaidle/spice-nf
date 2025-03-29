@@ -7,18 +7,73 @@ The tool **Splicing-based Protein Isoform Comparison Estimator (SPICE)** was cre
 This repository contains a Nextflow-based pipeline to automate the creation of SPICE libraries.
 Instead of running multiple scripts manually, you can now use this streamlined pipeline.
 
+```mermaid
+flowchart TB
+    %% Parameters %%
+    subgraph PARAMETERS
+        species[species]
+        release[release]
+        anno_tools[anno_tools]
+        outdir[outdir]
+    end
+
+    %% Processes %%
+    subgraph PIPELINE
+        SEQUENCES[SEQUENCES]
+        TOOLS[TOOLS]
+        LIBRARY_INITIALIZATION[LIBRARY_INITIALIZATION]
+        FAS_ANNOTATION[FAS_ANNOTATION]
+        LIBRARY_RESTRUCTURE[LIBRARY_RESTRUCTURE]
+        FAS_SCORING[FAS_SCORING]
+        CONCAT_FAS_SCORES[CONCAT_FAS_SCORES]
+    end
+
+    %% Outputs %%
+    subgraph OUTPUTS
+        library[library]
+    end
+
+    %% Connections %%
+    species --> SEQUENCES
+    release --> SEQUENCES
+    SEQUENCES --> LIBRARY_INITIALIZATION
+
+    species --> LIBRARY_INITIALIZATION
+    release --> LIBRARY_INITIALIZATION
+
+    anno_tools --> TOOLS
+
+    TOOLS --> LIBRARY_INITIALIZATION
+    TOOLS --> FAS_ANNOTATION
+
+    LIBRARY_INITIALIZATION --> FAS_ANNOTATION
+    FAS_ANNOTATION --> LIBRARY_RESTRUCTURE
+    LIBRARY_RESTRUCTURE --> FAS_SCORING
+    LIBRARY_RESTRUCTURE --> CONCAT_FAS_SCORES
+
+    FAS_SCORING --> CONCAT_FAS_SCORES
+    outdir --> CONCAT_FAS_SCORES
+
+    CONCAT_FAS_SCORES --> library
+```
+
 It is roughly divided into the following steps:
 
-* (Down)load transcriptome files
-* Initialize the SPICE library structure
-* Annotate peptide sequences for FAS scoring
-* Reorganize the library structure
-* FAS scoring
-* Merge FAS scores
+The pipeline is roughly divided into the following steps:
+
+- Download peptide sequences and annotation files from [ENSEMBL](https://www.ensembl.org/index.html) for the target organism.
+- Initialize the SPICE library structure and fetch species metadata from [ENSEMBL](https://www.ensembl.org/index.html).
+- Annotate the peptide sequences using [fas.doAnno](https://doi.org/10.1093/bioinformatics/btad226).
+- Restructure the annotated sequences in preparation for FAS scoring.
+- Perform FAS scoring using [fas.run](https://doi.org/10.1093/bioinformatics/btad226).
+- Merge the resulting FAS scores into the final library structure.
 
 ## Usage
 
-Below is the general installation/setup/usage explanation. If you are from AK Ebersberger please refer to the AKE usage documentation.
+Below is the general installation/setup/usage explanation. A detailed explanation and further assistance can be found in the [WIKI](https://github.com/felixhaidle/spice-nf/wiki)
+
+> [!NOTE]
+> If you are from AK Ebersberger please refer to the [AKE usage documentation](https://github.com/felixhaidle/spice-nf/wiki/02_1-Usage-AKE).
 
 ### Install FAS
 
@@ -34,6 +89,7 @@ fas.doAnno -i test_annofas.fa -o test_output
 ```
 
 ### Set up the pipeline
+
 As this pipeline is not part of nf-core, you first need to clone the repository:
 
 ```bash
@@ -66,14 +122,13 @@ nextflow run BIONF/spice_library_pipeline \
    --outdir <OUTDIR>
 ```
 
-
-| Parameter         | Description                                                                 |
-|------------------|-----------------------------------------------------------------------------|
-| `-profile conda`  | Specifies the execution profile (only `conda` is supported).                                 |
-| `--species`       | Species name (e.g., `homo_sapiens`, `mus_musculus`). Must match ENSEMBL naming. |
-| `--release`       | ENSEMBL release version (e.g., `109`, `110`). Used to fetch annotation data. |
-| `--anno_tools`    | Path to the installed annotation tools directory (equivalent to the `-t` parameter in `fas.setup`). |
-| `--outdir`        | Output directory for pipeline results. Will be created if it doesn't exist.  |
+| Parameter        | Description                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------- |
+| `-profile conda` | Specifies the execution profile (only `conda` is supported).                                        |
+| `--species`      | Species name (e.g., `homo_sapiens`, `mus_musculus`). Must match ENSEMBL naming.                     |
+| `--release`      | ENSEMBL release version (e.g., `109`, `110`). Used to fetch annotation data.                        |
+| `--anno_tools`   | Path to the installed annotation tools directory (equivalent to the `-t` parameter in `fas.setup`). |
+| `--outdir`       | Output directory for pipeline results. Will be created if it doesn't exist.                         |
 
 A full overview of all available parameters can be found in [`parameters.md`](docs/parameters.md).
 
