@@ -149,6 +149,11 @@ We thank the following people for their extensive assistance in the development 
 
 <!-- TODO nf-core: If applicable, make list of people who have also contributed -->
 
+## AI Assistance Acknowledgment
+
+Parts of this project’s documentation, code structuring, and scripting were developed with the assistance of AI (ChatGPT by OpenAI).
+All final decisions, modifications, and validations were made by the project author(s).
+
 ## Citations
 
 <!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
