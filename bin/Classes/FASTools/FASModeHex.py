@@ -1,9 +1,11 @@
 #!/bin/env python
 
 #######################################################################
-# Copyright (C) 2023 Christian Bluemel
+# Portions Copyright (C) 2023 Christian Bluemel
+# Copyright (C) 2025 Felix Haidle
 #
-# This file is part of Spice.
+# This file is part of spice_library_pipeline and includes adapted
+# code originally from the SPICE project.
 #
 #  FASModeHex is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -16,8 +18,10 @@
 #  GNU General Public License for more details.
 #
 #  You should have received a copy of the GNU General Public License
-#  along with Spice.  If not, see <http://www.gnu.org/licenses/>.
+#  along with this program. If not, see <https://www.gnu.org/licenses/>.
 #
+# Modifications:
+#   - Adapted by Felix Haidle in 2025 for use in spice_library_pipeline.
 #######################################################################
 
 from typing import List, Tuple, Dict

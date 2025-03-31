@@ -2,8 +2,9 @@
 
 #######################################################################
 # Copyright (C) 2023 Christian Bluemel
+# Copyright (C) 2025 Felix Haidle
 #
-# This file is part of Spice.
+# This file is part of Spice and has been adapted for spice_library_pipeline.
 #
 #  FASResultHandler is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -16,8 +17,10 @@
 #  GNU General Public License for more details.
 #
 #  You should have received a copy of the GNU General Public License
-#  along with Spice.  If not, see <http://www.gnu.org/licenses/>.
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+# Modifications:
+#   - Adapted by Felix Haidle in 2025 for integration into spice_library_pipeline.
 #######################################################################
 
 import json

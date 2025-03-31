@@ -1,24 +1,29 @@
 #!/bin/env python
 
 #######################################################################
-# Copyright (C) 2022 Julian Dosch
+# Portions Copyright (C) 2022 Julian Dosch
+# Copyright (C) 2025 Felix Haidle
 #
-# This file is part of main.
+# This file is part of spice_library_pipeline and includes adapted
+# code originally from the get_domain_importance module in the main project.
 #
-#  get_domain_importance is free software: you can redistribute it and/or modify
+#  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
-#  get_domain_importance is distributed in the hope that it will be useful,
+#  This program is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
 #
 #  You should have received a copy of the GNU General Public License
-#  along with PathwayTrace.  If not, see <http://www.gnu.org/licenses/>.
+#  along with this program. If not, see <https://www.gnu.org/licenses/>.
 #
+# Modifications:
+#   - Adapted by Felix Haidle in 2025 for spice_library_pipeline.
 #######################################################################
+
 
 
 import argparse
