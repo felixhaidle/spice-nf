@@ -20,7 +20,7 @@ include { SEQUENCES              } from '../modules/local/sequences'
 include { LIBRARY_INITIALIZATION } from '../modules/local/initialization'
 include { LIBRARY_RESTRUCTURE    } from '../modules/local/restructure'
 include { TOOLS                  } from '../modules/local/tools'
-
+include { COMPLEXITY             } from '../modules/local/complexity'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -126,10 +126,14 @@ workflow SPICE_LIBRARY_PIPELINE {
         // Channel to read gene IDs and resource requirements from the file genes.txt
         //
 
-        genes_ch = create_library.genes_txt_ch
+        genes_ch = COMPLEXITY(
+            domain_importance_library.domain_importance_library_ch,
+            create_library.genes_txt_ch
+        ).ordered_genes
         .splitText()
         .map { it.trim().split(' ') }
         .map { it[0] }  // Extract only gene_id
+        ch_versions = ch_versions.mix(COMPLEXITY.out.versions)
 
 
         fas_scores = FAS_SCORING(

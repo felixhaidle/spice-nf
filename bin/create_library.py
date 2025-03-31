@@ -44,27 +44,6 @@ from Classes.SequenceHandling.Gene import Gene
 from Classes.SequenceHandling.Protein import Protein
 from Classes.FASTools.FASModeHex import FASModeHex
 
-def classify_gene_size(gene) -> str:
-    """
-    Classify a gene based on the combined length of all its transcript sequences.
-
-    Args:
-    - gene (Gene): A gene object containing transcripts.
-
-    Returns:
-    - str: The size category ('small', 'medium', 'large').
-    """
-    # Compute the total transcript sequence length
-    total_length = sum(len(protein.get_sequence()) for protein in gene.get_proteins() if isinstance(protein, Protein))
-    print(total_length)
-    # Define thresholds (adjust based on empirical data)
-    if total_length < 5000:
-        return "small"
-    elif total_length < 50000:
-        return "medium"
-    else:
-        return "large"
-
 def write_gene_ids_to_file(gene_assembler: GeneAssembler, transcript_data_dir: str) -> None:
     """
     Write all gene IDs and their size classification in the library to a file in the transcript_data directory.
@@ -79,9 +58,7 @@ def write_gene_ids_to_file(gene_assembler: GeneAssembler, transcript_data_dir: s
     gene_list = gene_assembler.get_genes()
     with open(output_file, "w") as f:
         for gene in gene_list:
-            size_category = classify_gene_size(gene)
-            f.write(f"{gene.get_id()} {size_category}\n")  # Write gene ID with size classification
-            print(f"{gene.get_id()} {size_category}\n")
+            f.write(f"{gene.get_id()}\n")
 
     print(f"Gene IDs with size classification written to {output_file}.")
 
