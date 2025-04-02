@@ -29,6 +29,7 @@ flowchart TB
         LIBRARY_RESTRUCTURE[LIBRARY_RESTRUCTURE]
         FAS_SCORING[FAS_SCORING]
         CONCAT_FAS_SCORES[CONCAT_FAS_SCORES]
+        COMPLEXITY[COMPLEXITY]
     end
 
     %% Outputs %%
@@ -51,8 +52,12 @@ flowchart TB
 
     LIBRARY_INITIALIZATION --> FAS_ANNOTATION
     FAS_ANNOTATION --> LIBRARY_RESTRUCTURE
-    LIBRARY_RESTRUCTURE --> FAS_SCORING
+
+    LIBRARY_RESTRUCTURE --> COMPLEXITY
     LIBRARY_RESTRUCTURE --> CONCAT_FAS_SCORES
+
+
+    COMPLEXITY --> FAS_SCORING
 
     FAS_SCORING --> CONCAT_FAS_SCORES
     outdir --> CONCAT_FAS_SCORES
@@ -68,6 +73,7 @@ The pipeline is roughly divided into the following steps:
 - Initialize the SPICE library structure and fetch species metadata from [ENSEMBL](https://www.ensembl.org/index.html).
 - Annotate the peptide sequences using [fas.doAnno](https://doi.org/10.1093/bioinformatics/btad226).
 - Restructure the annotated sequences in preparation for FAS scoring.
+- Order FAS scoring by estimating run time for each gene by using [fas.calcComplexity](https://doi.org/10.1093/bioinformatics/btad226).
 - Perform FAS scoring using [fas.run](https://doi.org/10.1093/bioinformatics/btad226).
 - Merge the resulting FAS scores into the final library structure.
 
@@ -125,13 +131,13 @@ nextflow run BIONF/spice_library_pipeline \
    --outdir <OUTDIR>
 ```
 
-| Parameter        | Description                                                                                         |
-| ---------------- | --------------------------------------------------------------------------------------------------- |
-| `-profile conda` | Specifies the execution profile (only `conda` is supported).                                        |
-| `--species`      | Species name (e.g., `homo_sapiens`, `mus_musculus`). Must match ENSEMBL naming.                     |
-| `--release`      | ENSEMBL release version (e.g., `109`, `110`). Used to fetch annotation data.                        |
-| `--anno_tools`   | Path to the installed annotation tools directory (equivalent to the `-t` parameter in `fas.setup`). |
-| `--outdir`       | Output directory for pipeline results. Will be created if it doesn't exist.                         |
+| Parameter        | Description                                                                                                                                                                      |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `-profile conda` | Specifies the execution profile (only `conda` is supported).                                                                                                                     |
+| `--species`      | Species name (e.g., `homo_sapiens`, `mus_musculus`). Must match ENSEMBL naming.                                                                                                  |
+| `--release`      | ENSEMBL release version (e.g., `113`). Used to fetch annotation data. It is recommended to use the latest version. Please refer to [ENSEMBL](https://www.ensembl.org/index.html) |
+| `--anno_tools`   | Path to the installed annotation tools directory (equivalent to the `-t` parameter in `fas.setup`).                                                                              |
+| `--outdir`       | Output directory for pipeline results. Will be created if it doesn't exist.                                                                                                      |
 
 A full overview of all available parameters can be found in [`parameters.md`](docs/parameters.md).
 
@@ -146,6 +152,8 @@ A full list of available parameters and documentation can also be found in the *
 `BIONF/spice_library_pipeline` was originally written by **Felix Haidle**.
 
 We thank the following people for their extensive assistance in the development of this pipeline:
+
+[Become a contributor](https://github.com/felixhaidle/spice-nf/wiki/06-Contributing)
 
 <!-- TODO nf-core: If applicable, make list of people who have also contributed -->
 
