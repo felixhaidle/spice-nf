@@ -14,10 +14,13 @@ Instead of running multiple scripts manually, you can now use this streamlined p
 flowchart TB
     %% Parameters %%
     subgraph PARAMETERS
-    outdir[outdir]
-    anno_tools[anno_tools]
-    release[release]
     species[species]
+    release[release]
+    anno_tools[anno_tools]
+    outdir[outdir]
+
+
+
     end
 
     %% Processes %%
