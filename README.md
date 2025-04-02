@@ -14,10 +14,10 @@ Instead of running multiple scripts manually, you can now use this streamlined p
 flowchart TB
     %% Parameters %%
     subgraph PARAMETERS
-        species[species]
-        release[release]
-        anno_tools[anno_tools]
-        outdir[outdir]
+    outdir[outdir]
+    anno_tools[anno_tools]
+    release[release]
+    species[species]
     end
 
     %% Processes %%
@@ -39,16 +39,16 @@ flowchart TB
 
     %% Connections %%
     species --> SEQUENCES
-    release --> SEQUENCES
     SEQUENCES --> LIBRARY_INITIALIZATION
 
     species --> LIBRARY_INITIALIZATION
     release --> LIBRARY_INITIALIZATION
+    release --> SEQUENCES
 
     anno_tools --> TOOLS
 
-    TOOLS --> LIBRARY_INITIALIZATION
     TOOLS --> FAS_ANNOTATION
+    TOOLS --> LIBRARY_INITIALIZATION
 
     LIBRARY_INITIALIZATION --> FAS_ANNOTATION
     FAS_ANNOTATION --> LIBRARY_RESTRUCTURE
