@@ -2,7 +2,7 @@
 // Licensed under GNU GPL v3. See LICENSE file or https://www.gnu.org/licenses/gpl-3.0.en.html
 
 process COMPLEXITY{
-    label 'process_low'
+    label 'process_single'
 
 
 
