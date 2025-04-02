@@ -112,7 +112,8 @@ workflow SPICE_LIBRARY_PIPELINE {
 
         annotated_library = FAS_ANNOTATION(
             anno_tools,
-            create_library.library_dir
+            create_library.library_dir,
+            anno_tools_ch
         )
 
         ch_versions = ch_versions.mix(FAS_ANNOTATION.out.versions)
@@ -128,7 +129,8 @@ workflow SPICE_LIBRARY_PIPELINE {
 
         genes_ch = COMPLEXITY(
             domain_importance_library.domain_importance_library_ch,
-            create_library.genes_txt_ch
+            create_library.genes_txt_ch,
+            anno_tools_ch
         ).ordered_genes
         .splitText()
         .map { it.trim().split(' ') }
