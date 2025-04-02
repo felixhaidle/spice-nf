@@ -10,3 +10,4 @@ testing*
 bin/
 LICENSE
 ro-crate-metadata.json
+assets/test_files/

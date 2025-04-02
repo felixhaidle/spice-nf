@@ -5,11 +5,11 @@ repos:
       - id: prettier
         additional_dependencies:
           - prettier@3.2.5
-        exclude: (^|/)LICENSE$
+        exclude: "(^|/)(LICENSE|assets/test_files/)"
 
   - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
     rev: "3.1.2"
     hooks:
       - id: editorconfig-checker
         alias: ec
-        exclude: (^|/)LICENSE$
+        exclude: "(^|/)(LICENSE|assets/test_files/)"
