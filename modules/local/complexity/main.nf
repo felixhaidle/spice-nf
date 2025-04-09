@@ -26,7 +26,7 @@ process COMPLEXITY{
 
     fas.calcComplexity \
     -i "${spice_library}/fas_data/annotations.json" \
-    -d "${anno_tools_file}"
+    -d "${anno_tools_file}" \
     > complexity.txt
 
     sort_genes_by_complexity.py \
