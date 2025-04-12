@@ -18,6 +18,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Spice.  If not, see <http://www.gnu.org/licenses/>.
 #
+# Modifications:
+#   - Adapted by Felix Haidle in 2025 for integration into spice_library_pipeline.
 #######################################################################
 
 
@@ -27,56 +29,87 @@ import shutil
 from contextlib import closing
 from urllib import request
 
-from Classes.API.ensembl_mod.EnsemblUtils import ping_ensembl, get_current_release, get_id_taxon, get_species_info
-
+from Classes.API.ensembl_mod.EnsemblUtils import (
+    ping_ensembl,
+    get_id_taxon,
+    get_species_info,
+)
 
 class LocalEnsembl:
-    ftp_template: str = "http://ftp.ensembl.org/pub/release-{0}/gtf/{1}/{2}.{3}.{4}.gtf.gz"
-    ftp_pep_template: str = "http://ftp.ensembl.org/pub/release-{0}/fasta/{1}/pep/{2}.{3}.pep.all.fa.gz"
-    # 0=release_num
-    # 1=species_name
-    # 2=url_species_name
-    # 3=assembly_default_name
-    # 4=release_num
+    def __init__(
+        self,
+        raw_species: str,
+        goal_directory: str,
+        release: str = None,
+        division: str = "Ensembl",
+        metadata_mode: str = "auto",  # or "placeholder"
+    ) -> None:
+        self.goal_directory = goal_directory
+        self.raw_species_name = raw_species
+        self.division = division
+        self.release = release
+        self.metadata_mode = metadata_mode
 
-    filename_template: str = "{0}.{1}.{2}.gtf.gz" # url_species_name, assembly_default_name, release_num
-    filename_pep_template: str = "{0}.{1}.pep.all.fa.gz" # url_species_name, assembly_default_name
+        # Metadata population
+        if self.metadata_mode == "auto":
+            metadata = get_species_info(raw_species)  # Adjust this to return a dict or tuple with division
+            if isinstance(metadata, dict):
+                self.species_name = metadata["name"]
+                self.url_species_name = metadata["url_name"]
+                self.assembly_default_species_name = metadata["assembly_default"]
+                self.division = metadata.get("division", division)  # fallback to passed division if needed
+            else:
+                self.species_name, self.url_species_name, self.assembly_default_species_name = metadata
+                self.division = division  # fallback if no division in tuple response
 
-    def __init__(self, raw_species: str, goal_directory: str, release_num: str = "default") -> None:
-        self.goal_directory: str = goal_directory
-
-        self.raw_species_name: str = raw_species
-
-        if release_num == "default":
-            self.release_num: str = get_current_release()
+            self.taxon_id = get_id_taxon(self.species_name)
+        elif self.metadata_mode == "placeholder":
+            self.species_name = "custom_species"
+            self.url_species_name = "custom_species"
+            self.assembly_default_species_name = "custom_assembly"
+            self.division = division or "Ensembl"
+            self.taxon_id = "999999"
         else:
-            self.release_num: str = release_num
+            raise ValueError(f"Invalid metadata_mode: {metadata_mode}")
 
-        self.species_name: str
-        self.assembly_default_species_name: str
-        self.url_species_name: str
-        self.species_name, self.url_species_name, self.assembly_default_species_name = get_species_info(raw_species)
-        self.taxon_id: str = get_id_taxon(self.species_name)
+        # Filename templates
+        self.local_zipname = f"{self.url_species_name}.{self.assembly_default_species_name}.{self.release or 'latest'}.gtf.gz"
+        self.local_pep_zipname = f"{self.url_species_name}.{self.assembly_default_species_name}.pep.all.fa.gz"
+        self.local_filename = self.local_zipname[:-3]
+        self.local_pep_filename = self.local_pep_zipname[:-3]
 
-        self.local_zipname: str = self.filename_template.format(self.url_species_name,
-                                                                self.assembly_default_species_name,
-                                                                self.release_num)
-        self.local_pep_zipname: str = self.filename_pep_template.format(self.url_species_name,
-                                                                        self.assembly_default_species_name)
+        # FTP logic
+        self.ftp_address = self.build_ftp_url(file_type="gtf")
+        self.ftp_pep_address = self.build_ftp_url(file_type="pep")
 
-        self.local_filename: str = self.local_zipname[:-3]
-        self.local_pep_filename: str = self.local_pep_zipname[:-3]
+    def build_ftp_url(self, file_type: str) -> str:
+        """Constructs the FTP path for GTF or PEP depending on release + division."""
+        # Define base FTPs
+        ftp_base = {
+            "Ensembl": "https://ftp.ensembl.org/pub/",
+            "EnsemblPlants": "http://ftp.ensemblgenomes.org/pub/plants/",
+            "EnsemblFungi": "http://ftp.ensemblgenomes.org/pub/fungi/",
+            "EnsemblMetazoa": "http://ftp.ensemblgenomes.org/pub/metazoa/",
+        }
 
-        self.ftp_address: str = self.ftp_template.format(self.release_num,
-                                                         self.species_name,
-                                                         self.url_species_name,
-                                                         self.assembly_default_species_name,
-                                                         self.release_num)
+        if self.division not in ftp_base:
+            raise ValueError(f"Unsupported division: {self.division}")
 
-        self.ftp_pep_address: str = self.ftp_pep_template.format(self.release_num,
-                                                             self.species_name,
-                                                             self.url_species_name,
-                                                             self.assembly_default_species_name)
+        base = ftp_base[self.division]
+
+        if self.release:
+            release_folder = f"release-{self.release}"
+        else:
+            release_folder = "current" if self.division != "Ensembl" else f"current_{file_type}"
+
+        file_name_species = self.url_species_name.lower()
+
+        if file_type == "gtf":
+            return f"{base}{release_folder}/gtf/{file_name_species}/{self.url_species_name}.{self.assembly_default_species_name}.{self.release or 'gtf'}.gtf.gz"
+        elif file_type == "pep":
+            return f"{base}{release_folder}/fasta/{file_name_species}/pep/{self.url_species_name}.{self.assembly_default_species_name}.pep.all.fa.gz"
+        else:
+            raise ValueError("Invalid file_type (must be 'gtf' or 'pep')")
 
     def get_species_name(self) -> str:
         return self.species_name
@@ -86,40 +119,50 @@ class LocalEnsembl:
 
     def download(self, test_url=None) -> str:
         if not self.is_downloaded():
-            download_url = test_url if test_url else self.ftp_address
-            print(f"\tDownloading {download_url}.")
+            download_url = test_url or self.ftp_address
+            print(f"\tDownloading {download_url}")
             with closing(request.urlopen(download_url)) as r:
                 with open(os.path.join(self.goal_directory, self.local_zipname), 'wb') as f:
                     shutil.copyfileobj(r, f)
 
-            # Unpacking file
             with gzip.open(os.path.join(self.goal_directory, self.local_zipname), 'rb') as f_in:
                 with open(os.path.join(self.goal_directory, self.local_filename), "wb") as f_out:
                     shutil.copyfileobj(f_in, f_out)
+
             os.remove(os.path.join(self.goal_directory, self.local_zipname))
         else:
-            print("Ensembl file already downloaded. (" + os.path.join(self.goal_directory, self.local_filename) + ")")
+            print(f"GTF already downloaded: {self.local_filename}")
         return os.path.join(self.goal_directory, self.local_filename)
 
     def download_pep(self, test_url=None) -> str:
         if not self.is_pep_downloaded():
-            download_url = test_url if test_url else self.ftp_pep_address
-            print(f"\tDownloading {download_url}.")
+            download_url = test_url or self.ftp_pep_address
+            print(f"\tDownloading {download_url}")
             with closing(request.urlopen(download_url)) as r:
                 with open(os.path.join(self.goal_directory, self.local_pep_zipname), 'wb') as f:
                     shutil.copyfileobj(r, f)
 
-            # Unpacking file
             with gzip.open(os.path.join(self.goal_directory, self.local_pep_zipname), 'rb') as f_in:
                 with open(os.path.join(self.goal_directory, self.local_pep_filename), "wb") as f_out:
                     shutil.copyfileobj(f_in, f_out)
+
             os.remove(os.path.join(self.goal_directory, self.local_pep_zipname))
         else:
-            print("Coding sequences already downloaded. (" + os.path.join(self.goal_directory, self.local_pep_filename) + ")")
+            print(f"PEP already downloaded: {self.local_pep_filename}")
         return os.path.join(self.goal_directory, self.local_pep_filename)
 
+    def is_downloaded(self) -> bool:
+        return os.path.isfile(os.path.join(self.goal_directory, self.local_filename))
+
+    def is_pep_downloaded(self) -> bool:
+        return os.path.isfile(os.path.join(self.goal_directory, self.local_pep_filename))
+
+    @property
+    def ping(self) -> bool:
+        return ping_ensembl()
+
     def get_release_num(self) -> str:
-        return self.release_num
+        return self.release or "latest"
 
     def remove(self) -> None:
         if self.is_downloaded():
@@ -128,27 +171,3 @@ class LocalEnsembl:
     def remove_pep(self) -> None:
         if self.is_pep_downloaded():
             os.remove(os.path.join(self.goal_directory, self.local_pep_filename))
-
-    @property
-    def ping(self) -> bool:
-        return ping_ensembl()
-
-    def is_downloaded(self) -> bool:
-        if os.path.isfile(os.path.join(self.goal_directory, self.local_filename)):
-            return True
-        else:
-            return False
-
-    def is_pep_downloaded(self) -> bool:
-        if os.path.isfile(os.path.join(self.goal_directory, self.local_pep_filename)):
-            return True
-        else:
-            return False
-
-
-def main():
-    pass
-
-
-if __name__ == "__main__":
-    main()

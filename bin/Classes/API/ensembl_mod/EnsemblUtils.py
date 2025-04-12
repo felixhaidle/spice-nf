@@ -18,6 +18,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Spice.  If not, see <http://www.gnu.org/licenses/>.
 #
+# Modifications:
+#   - Adapted by Felix Haidle in 2025 for integration into spice_library_pipeline.
 #######################################################################
 
 import requests
@@ -87,19 +89,20 @@ def get_id_taxon(species: str) -> str:
     return decoded[0]["species_taxonomy_id"]
 
 
-def get_species_info(raw_species: str) -> Tuple[str, str, str]:
-    r = requests.get("https://rest.ensembl.org/info/genomes/" + raw_species + "?",
+def get_species_info(raw_species: str) -> dict:
+    r = requests.get(f"https://rest.ensembl.org/info/genomes/{raw_species}?",
                      headers={"Content-Type": "application/json"})
     if not r.ok:
-        print("Species could not be found")
-        r.raise_for_status()
-        sys.exit()
+        raise Exception("Species could not be found.")
 
-    decoded: Dict[str, Any] = r.json()
-    url_species_name: str = decoded["url_name"]
-    species_name: str = decoded["name"]
-    assembly_default_species_name: str = decoded["assembly_default"]
-    return species_name, url_species_name, assembly_default_species_name
+    decoded = r.json()
+    return {
+        "name": decoded["name"],
+        "url_name": decoded["url_name"],
+        "assembly_default": decoded["assembly_default"],
+        "division": decoded["division"]
+    }
+
 
 
 def main():
