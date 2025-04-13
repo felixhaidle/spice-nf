@@ -21,6 +21,7 @@ include { LIBRARY_INITIALIZATION } from '../modules/local/initialization'
 include { LIBRARY_RESTRUCTURE    } from '../modules/local/restructure'
 include { TOOLS                  } from '../modules/local/tools'
 include { COMPLEXITY             } from '../modules/local/complexity'
+include { METADATA               } from '../modules/local/metadata'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -58,17 +59,35 @@ workflow SPICE_LIBRARY_PIPELINE {
 
 
         if (!gtf_exists || !fasta_exists) {
-            sequence_files = SEQUENCES(
+            metadata_ch = SEQUENCES(
                 species,
                 release
             )
+            ch_versions = ch_versions.mix(SEQUENCES.out.versions)
 
-            gtf_file_ch = sequence_files.gtf_file
-            fasta_file_ch = sequence_files.fasta_file
+
+
+            gtf_file_ch = metadata_ch.gtf_file
+            fasta_file_ch = metadata_ch.fasta_file
         } else {
+            metadata_ch = METADATA(
+                species,
+                params.is_ensembl
+            )
+
+            ch_versions = ch_versions.mix(METADATA.out.versions)
+
             gtf_file_ch = channel.fromPath(annotation_gtf)
             fasta_file_ch = channel.fromPath(peptide_fasta)
+
+
         }
+
+
+
+
+
+
 
         //
         // Load the file with the ENSEMBL stable ID prefixes
@@ -103,10 +122,11 @@ workflow SPICE_LIBRARY_PIPELINE {
         create_library = LIBRARY_INITIALIZATION(
             gtf_file_ch,
             fasta_file_ch,
-            species,
-            release,
+            metadata_ch.species_name,
+            metadata_ch.release,
             prefixes,
-            anno_tools_ch
+            anno_tools_ch,
+            metadata_ch.taxon_id
         )
         ch_versions = ch_versions.mix(LIBRARY_INITIALIZATION.out.versions)
 

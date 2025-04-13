@@ -10,7 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["outdir", "species", "release", "anno_tools"],
+            "required": ["outdir", "species", "anno_tools"],
             "properties": {
                 "outdir": {
                     "type": "string",
@@ -27,10 +27,11 @@
                     "fa_icon": "fas fa-dna"
                 },
                 "release": {
-                    "type": "integer",
-                    "description": "Ensembl genome release version (e.g., '113').",
-                    "help_text": "Specify the Ensembl release version for the genome (e.g., 113).",
-                    "minimum": 1,
+                    "type": "number",
+                    "default": -1.0,
+                    "description": "Ensembl genome release version (e.g., 113). Default will automatically retrieve the latest release from the appropriate Ensembl server.",
+                    "help_text": "If null, the latest release will be fetched automatically. Note: Ensembl and Ensembl Genomes (Plants, Fungi, Metazoa) use different release numbers. Please refer to the Ensembl FTP or REST API for the correct version.",
+                    "minimum": -1,
                     "fa_icon": "fas fa-calendar-alt"
                 },
                 "anno_tools": {
@@ -59,6 +60,11 @@
                     "type": "string",
                     "description": "Annotation tools that should NOT be used for the FAS annotation",
                     "pattern": "^([a-zA-Z0-9_+-]+)(,[a-zA-Z0-9_+-]+)*$"
+                },
+                "is_ensembl": {
+                    "type": "boolean",
+                    "description": "Indicates whether the input files originate from an Ensembl species. Disables Ensembl API metadata fetching if set to false.",
+                    "default": true
                 }
             }
         },

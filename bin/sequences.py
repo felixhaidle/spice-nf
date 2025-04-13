@@ -24,63 +24,56 @@
 #   - Adapted by Felix Haidle in 2025 from SPICE's spice_library.py.
 #######################################################################
 
-
 import argparse
 import os
+import json
+
 from Classes.API.ensembl_mod.LocalEnsembl import LocalEnsembl
 
-def download_gtf_and_peptides(outdir: str, species: str, release: str) -> (str, str):
+
+def download_gtf_and_peptides(outdir: str, species: str, release: int):
     """
     Downloads GTF and peptide FASTA files for a specified species and Ensembl release.
-
-    Args:
-        outdir (str): Directory where the files will be downloaded.
-        species (str): Species name (e.g., "homo_sapiens").
-        release (str): Ensembl release version (e.g., "109").
-
-    Returns:
-        tuple: Paths to the downloaded GTF and peptide FASTA files.
+    Returns: (gtf_path, pep_path, species_name, taxon_id, resolved_release)
     """
     os.makedirs(outdir, exist_ok=True)
-    local_ensembl = LocalEnsembl(species, outdir, release)
+
+    local_ensembl = LocalEnsembl(
+        raw_species=species,
+        goal_directory=outdir,
+        release=release
+    )
 
     print("Downloading GTF and peptide FASTA datasets from Ensembl...")
+    gtf_path = local_ensembl.download()
+    pep_path = local_ensembl.download_pep()
 
-    gtf_path = local_ensembl.download()       # Download GTF file
-    pep_path = local_ensembl.download_pep()   # Download peptide FASTA
+    # Get metadata
+    species_name = local_ensembl.get_species_name()
+    taxon_id = local_ensembl.get_taxon_id()
+    resolved_release = local_ensembl.get_release_num()
 
-    print(f"GTF_PATH={gtf_path}")
-    print(f"PEP_PATH={pep_path}")
-    return gtf_path, pep_path
+    return gtf_path, pep_path, species_name, taxon_id, resolved_release
 
 
 def main():
-    """
-    CLI entry point. Parses arguments and triggers GTF and peptide download.
-
-    Outputs:
-        GTF_PATH and PEP_PATH to stdout (for capturing by Nextflow or similar tools).
-    """
     parser = argparse.ArgumentParser(
         description="Download GTF and peptide FASTA files from Ensembl."
     )
-    parser.add_argument('--outdir', type=str, required=True,
-                        help='Output directory for the downloaded files.')
-    parser.add_argument('--species', type=str, required=True,
-                        help='Species name (e.g., homo_sapiens).')
-    parser.add_argument('--release', type=str, required=True,
-                        help='Ensembl release version (e.g., 109).')
+    parser.add_argument('--outdir', type=str, required=True, help='Download directory')
+    parser.add_argument('--species', type=str, required=True, help='Species name (e.g., homo_sapiens)')
+    parser.add_argument('--release', type=int, default=-1, help='Ensembl release version, or -1 for latest')
 
     args = parser.parse_args()
 
-    gtf_path, pep_path = download_gtf_and_peptides(
+    gtf_path, pep_path, species_name, taxon_id, release = download_gtf_and_peptides(
         args.outdir, args.species, args.release
     )
 
-    # Print again so Nextflow or other pipeline tools can easily parse the paths
-    print(f"GTF_PATH={gtf_path}")
-    print(f"PEP_PATH={pep_path}")
+
+    print(f"{species_name}\t{taxon_id}\t{release}")
 
 
 if __name__ == "__main__":
     main()
+

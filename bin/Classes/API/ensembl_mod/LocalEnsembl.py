@@ -41,7 +41,7 @@ class LocalEnsembl:
         self,
         raw_species: str,
         goal_directory: str,
-        release: str = None,
+        release: str = -1,
         division: str = "Ensembl",
         metadata_mode: str = "auto",  # or "placeholder"
     ) -> None:
@@ -70,7 +70,7 @@ class LocalEnsembl:
             self.assembly_default_species_name = "custom_assembly"
             self.division = division or "Ensembl"
             self.taxon_id = "999999"
-            # ⛔ Skip FTP setup
+            # Skip FTP setup
             self.ftp_address = None
             self.ftp_pep_address = None
             self.local_zipname = ""
@@ -82,15 +82,15 @@ class LocalEnsembl:
         else:
             raise ValueError(f"Invalid metadata_mode: {metadata_mode}")
 
-        # Filename templates
-        self.local_zipname = f"{self.url_species_name}.{self.assembly_default_species_name}.{self.release or 'latest'}.gtf.gz"
-        self.local_pep_zipname = f"{self.url_species_name}.{self.assembly_default_species_name}.pep.all.fa.gz"
-        self.local_filename = self.local_zipname[:-3]
-        self.local_pep_filename = self.local_pep_zipname[:-3]
-
         # FTP logic
         self.ftp_address = self.build_ftp_url(file_type="gtf")
         self.ftp_pep_address = self.build_ftp_url(file_type="pep")
+
+        # Filename templates
+        self.local_zipname = f"{self.url_species_name}.{self.assembly_default_species_name}.{self.release}.gtf.gz"
+        self.local_pep_zipname = f"{self.url_species_name}.{self.assembly_default_species_name}.pep.all.fa.gz"
+        self.local_filename = self.local_zipname[:-3]
+        self.local_pep_filename = self.local_pep_zipname[:-3]
 
     def build_ftp_url(self, file_type: str) -> str:
         ftp_base = {
@@ -107,11 +107,12 @@ class LocalEnsembl:
         base = ftp_base[self.division]
         file_name_species = self.url_species_name.lower()
 
-        if self.release:
+        if self.release != -1:
             release_folder = f"release-{self.release}"
             release_number = self.release
         else:
             release_folder = "current" if self.division != "Ensembl" else f"current_{file_type}"
+
             if file_type == "gtf":
                 folder_url = f"{base}{release_folder}/gtf/{file_name_species}/"
             elif file_type == "pep":
@@ -120,7 +121,7 @@ class LocalEnsembl:
                 raise ValueError("Invalid file_type (must be 'gtf' or 'pep')")
 
             resolved_filename, resolved_release = resolve_ensembl_current_filename(folder_url, file_type)
-            self._resolved_release = resolved_release
+            self.release = resolved_release  # Update the object’s release
             return f"{folder_url}{resolved_filename}"
 
         # Construct URLs for explicit release
@@ -134,28 +135,28 @@ class LocalEnsembl:
 
 
 
-        def get_species_name(self) -> str:
-            return self.species_name
+    def get_species_name(self) -> str:
+        return self.species_name
 
-        def get_taxon_id(self) -> str:
-            return self.taxon_id
+    def get_taxon_id(self) -> str:
+        return self.taxon_id
 
-        def download(self, test_url=None) -> str:
-            if not self.is_downloaded():
-                download_url = test_url or self.ftp_address
-                print(f"\tDownloading {download_url}")
-                with closing(request.urlopen(download_url)) as r:
-                    with open(os.path.join(self.goal_directory, self.local_zipname), 'wb') as f:
-                        shutil.copyfileobj(r, f)
+    def download(self, test_url=None) -> str:
+        if not self.is_downloaded():
+            download_url = test_url or self.ftp_address
+            print(f"\tDownloading {download_url}")
+            with closing(request.urlopen(download_url)) as r:
+                with open(os.path.join(self.goal_directory, self.local_zipname), 'wb') as f:
+                    shutil.copyfileobj(r, f)
 
-                with gzip.open(os.path.join(self.goal_directory, self.local_zipname), 'rb') as f_in:
-                    with open(os.path.join(self.goal_directory, self.local_filename), "wb") as f_out:
-                        shutil.copyfileobj(f_in, f_out)
+            with gzip.open(os.path.join(self.goal_directory, self.local_zipname), 'rb') as f_in:
+                with open(os.path.join(self.goal_directory, self.local_filename), "wb") as f_out:
+                    shutil.copyfileobj(f_in, f_out)
 
-                os.remove(os.path.join(self.goal_directory, self.local_zipname))
-            else:
-                print(f"GTF already downloaded: {self.local_filename}")
-            return os.path.join(self.goal_directory, self.local_filename)
+            os.remove(os.path.join(self.goal_directory, self.local_zipname))
+        else:
+            print(f"GTF already downloaded: {self.local_filename}")
+        return os.path.join(self.goal_directory, self.local_filename)
 
     def download_pep(self, test_url=None) -> str:
         if not self.is_pep_downloaded():

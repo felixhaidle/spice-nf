@@ -13,6 +13,7 @@ process LIBRARY_INITIALIZATION {
     val release
     path prefixes
     path anno_tools
+    val taxon_id
 
     output:
     path 'spice_lib_*'                          , emit: library_dir
@@ -34,7 +35,8 @@ process LIBRARY_INITIALIZATION {
     --fasta_path ${fasta_file} \
     --species ${species} \
     --release ${release} \
-    --modefas ${anno_tools}
+    --modefas ${anno_tools} \
+    --taxon_id ${taxon_id}
 
 
     filter_library.py \

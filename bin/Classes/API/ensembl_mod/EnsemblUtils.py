@@ -26,6 +26,8 @@ import requests
 import sys
 import re
 
+
+
 from typing import Dict, List, Tuple
 from typing import Any
 
@@ -108,7 +110,7 @@ def get_species_info(raw_species: str) -> dict:
         "division": decoded["division"]
     }
 
-def resolve_ensembl_current_filename(base_url: str, file_type: str = "gtf") -> tuple[str, str]:
+def resolve_ensembl_current_filename(base_url: str, file_type: str = "gtf") -> Tuple[str, str]:
     """
     Retrieve the latest filename from an Ensembl 'current' FTP folder, and extract its release version.
 

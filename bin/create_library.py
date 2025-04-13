@@ -38,7 +38,6 @@ from Classes.SequenceHandling.GeneAssembler import GeneAssembler
 from Classes.SequenceHandling.LibraryInfo import LibraryInfo
 from Classes.PassPath.PassPath import PassPath
 from Classes.TreeGrow.TreeGrow import TreeGrow
-from Classes.API.ensembl_mod.LocalEnsembl import LocalEnsembl
 from Classes.FastaBoy.FastaBoy import EnsemblFastaBoy
 from Classes.SequenceHandling.Gene import Gene
 from Classes.SequenceHandling.Protein import Protein
@@ -224,12 +223,15 @@ def main():
     parser.add_argument('--release', type=str, required=True, help='Ensembl release version.')
     parser.add_argument('--min_protein_length', type=int, default=11, help='Minimum protein length to retain.')
     parser.add_argument('--modefas', type=str, default=None, help='Path to a FAS mode file to configure FAS in this library.')
+    parser.add_argument('--taxon_id', type=str, required=True, help='NCBI Taxonomy ID for the species.')
+
 
     args = parser.parse_args()
 
-    # Initialize LocalEnsembl instance
-    local_ensembl = LocalEnsembl(args.species, args.outdir, args.release)
-    taxon_id = local_ensembl.get_taxon_id()
+
+    # Use provided taxon ID
+    taxon_id = args.taxon_id
+
 
     # Set up FAS mode hex
     fas_mode_hex = FASModeHex()
