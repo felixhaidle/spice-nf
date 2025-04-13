@@ -24,11 +24,16 @@
 
 import requests
 import sys
+import re
 
 from typing import Dict, List, Tuple
 from typing import Any
 
 from requests import Response
+
+from urllib import request
+from urllib.error import URLError, HTTPError
+
 
 
 def chunks(lst: List[str], n: int) -> List[List[str]]:
@@ -102,6 +107,37 @@ def get_species_info(raw_species: str) -> dict:
         "assembly_default": decoded["assembly_default"],
         "division": decoded["division"]
     }
+
+def resolve_ensembl_current_filename(base_url: str, file_type: str = "gtf") -> tuple[str, str]:
+    """
+    Retrieve the latest filename from an Ensembl 'current' FTP folder, and extract its release version.
+
+    Returns:
+        (filename, release_version)
+    """
+    try:
+        with request.urlopen(base_url) as response:
+            html = response.read().decode("utf-8")
+
+            if file_type == "gtf":
+                pattern = re.compile(r'href="([^"]+\.gtf\.gz)"')
+            elif file_type == "pep":
+                pattern = re.compile(r'href="([^"]+\.pep\.all\.fa\.gz)"')
+            else:
+                raise ValueError(f"Unsupported file type: {file_type}")
+
+            matches = pattern.findall(html)
+            if matches:
+                filename = matches[0]
+                # Try to extract version number from filename like: .NN.gtf.gz
+                version_match = re.search(r'\.(\d+)\.gtf\.gz', filename)
+                version = version_match.group(1) if version_match else "unknown"
+                return filename, version
+
+    except (HTTPError, URLError) as e:
+        raise Exception(f"Could not resolve latest file from {base_url}: {e}")
+
+    raise Exception(f"No .{file_type} file found at {base_url}")
 
 
 
