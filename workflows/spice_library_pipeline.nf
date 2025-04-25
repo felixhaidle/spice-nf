@@ -15,13 +15,15 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_spic
 // local
 include { FAS_ANNOTATION         } from '../modules/local/fas/annotation'
 include { FAS_SCORING            } from '../modules/local/fas/scoring'
-include { CONCAT_FAS_SCORES      } from '../modules/local/concat'
+include { CONCAT_GENES           } from '../modules/local/concat/genes'
 include { SEQUENCES              } from '../modules/local/sequences'
 include { LIBRARY_INITIALIZATION } from '../modules/local/initialization'
 include { LIBRARY_RESTRUCTURE    } from '../modules/local/restructure'
 include { TOOLS                  } from '../modules/local/tools'
 include { COMPLEXITY             } from '../modules/local/complexity'
 include { METADATA               } from '../modules/local/metadata'
+include { SEED_PARALLELIZATION   } from '../modules/local/seed_parallelization'
+include { CONCAT_PROTEIN_PAIRS   } from '../modules/local/concat/protein_pairs'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -147,34 +149,57 @@ workflow SPICE_LIBRARY_PIPELINE {
         // Channel to read gene IDs and resource requirements from the file genes.txt
         //
 
-        genes_ch = COMPLEXITY(
+        complexity_ch = COMPLEXITY(
             domain_importance_library.domain_importance_library_ch,
-            create_library.genes_txt_ch,
             anno_tools_ch
-        ).ordered_genes
-        .splitText()
-        .map { it.trim().split(' ') }
-        .map { it[0] }  // Extract only gene_id
+        )
         ch_versions = ch_versions.mix(COMPLEXITY.out.versions)
 
+        protein_pairs = SEED_PARALLELIZATION(
+            create_library.genes_txt_ch,
+            complexity_ch.complexity,
+            domain_importance_library.domain_importance_library_ch,
+            params.fas_partitions
+        )
+        ch_versions = ch_versions.mix(SEED_PARALLELIZATION.out.versions)
+
+        protein_pairs.protein_pairings_ch.view()
+        protein_pairs.partition_ch.view()
+
+        if (params.fas_partitions > 0) {
+            input_fas = protein_pairs.partition_ch.flatten()
+        } else {
+            input_fas = protein_pairs.protein_pairings_ch.flatten()
+        }
+
+        input_fas.view()
 
         fas_scores = FAS_SCORING(
-            genes_ch,
+            input_fas,
             domain_importance_library.domain_importance_library_ch,
             anno_tools
             )
 
         ch_versions = ch_versions.mix(FAS_SCORING.out.versions)
 
-        fas_score_library = fas_scores.fas_scored_directories.collect()
 
-        concatenated_fas_scores_library = CONCAT_FAS_SCORES (
-            fas_score_library,
+
+        fas_scores_ch = fas_scores.fas_scored_directories.collect()
+
+        merged_fas_scores = CONCAT_PROTEIN_PAIRS (
+            create_library.genes_txt_ch,
+            fas_scores_ch
+        )
+        ch_versions = ch_versions.mix(CONCAT_PROTEIN_PAIRS.out.versions)
+
+
+        concatenated_fas_scores_library = CONCAT_GENES (
+            merged_fas_scores.genes_directorys,
             domain_importance_library.domain_importance_library_ch,
             outdir
         )
 
-        ch_versions = ch_versions.mix(CONCAT_FAS_SCORES.out.versions)
+        ch_versions = ch_versions.mix(CONCAT_GENES.out.versions)
 
         //
         // Collate and save software versions

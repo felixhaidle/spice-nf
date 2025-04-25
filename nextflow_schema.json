@@ -65,6 +65,11 @@
                     "type": "boolean",
                     "description": "Indicates whether the input files originate from an Ensembl species. Disables Ensembl API metadata fetching if set to false.",
                     "default": true
+                },
+                "fas_partitions": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Number of partitions for the FAS scoring. Fas scoring will be split up into this amount of partitions to reduce the makespan. Make sure that you can run this amount of processes in parallel. Default is 0 (no pre-partitioning, will submit each fas scoring as a sepearte process, not recommended)."
                 }
             }
         },

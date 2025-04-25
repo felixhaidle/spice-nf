@@ -1,14 +1,14 @@
 // Copyright (C) 2025 Felix Haidle
 // Licensed under GNU GPL v3. See LICENSE file or https://www.gnu.org/licenses/gpl-3.0.en.html
 
-process CONCAT_FAS_SCORES {
+process CONCAT_GENES {
     label 'process_single'
 
 
     input:
     path fas_scores_dir
-    path spice_library // Directory containing all necessary files
-    val outdir // Output directory path
+    path spice_library
+    val outdir
 
     output:
     path "${spice_library}"       , emit: finished_library
