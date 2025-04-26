@@ -23,23 +23,23 @@ process CONCAT_PROTEIN_PAIRS {
 
     """
 
-    mkdir merged_genes
+    mkdir -p merged_tmp
+    mkdir -p merged_genes
 
-    GENE_FILE=${genes_txt}
+    # Merge forward.domains safely
+    head -n 1 \$(ls *_forward.domains | head -n 1) > merged_tmp/merged_forward.domains
+    tail -n +2 -q *_forward.domains >> merged_tmp/merged_forward.domains
 
-    # Loop over each line (gene ID) in the file
-    while IFS= read -r GENE_ID || [ -n "\${GENE_ID}" ]; do
-        # Skip empty lines
-        if [ -z "\${GENE_ID}" ]; then
-            continue
-        fi
+    # Merge reverse.domains safely
+    head -n 1 \$(ls *_reverse.domains | head -n 1) > merged_tmp/merged_reverse.domains
+    tail -n +2 -q *_reverse.domains >> merged_tmp/merged_reverse.domains
 
-        echo "Processing gene: \${GENE_ID}"
-        merge_protein_pairs.py \
-            --gene_id "\${GENE_ID}" \
-            --output_base "merged_genes"
+    # Merge phyloprofile safely
+    head -n 1 \$(ls *.phyloprofile | head -n 1) > merged_tmp/merged.phyloprofile
+    tail -n +2 -q *.phyloprofile >> merged_tmp/merged.phyloprofile
 
-    done < "\${GENE_FILE}"
+    # Now run the Python script
+    split_batches.py --batch_dir merged_tmp --output_base merged_genes
 
 
     cat <<-END_VERSIONS > versions.yml

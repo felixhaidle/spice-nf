@@ -91,14 +91,22 @@ def lpt_partition(pair_scores, num_bins):
     return bins
 
 
-def move_files_to_partitions(partitions):
-    """Move .tsv files into partition_X folders"""
+def merge_files_into_partitions(partitions):
+    """Merge .tsv files into partition_X/partition_X.tsv (one entry per line)."""
     for i, bin_files in enumerate(partitions):
         part_dir = f"partition_{i}"
         os.makedirs(part_dir, exist_ok=True)
 
-        for f in bin_files:
-            shutil.move(f, os.path.join(part_dir, f))
+        merged_path = os.path.join(part_dir, f"partition_{i}.tsv")
+        with open(merged_path, "w") as merged_file:
+            for f in bin_files:
+                with open(f, "r") as infile:
+                    for line in infile:
+                        line = line.rstrip('\n')  # remove any accidental multiple newlines
+                        merged_file.write(line + "\n")  # re-add exactly one newline
+
+
+
 
 
 def main():
@@ -135,7 +143,7 @@ def main():
     print(f"Partitioned into {split_partitions_number} bins")
 
     # Step 6: Move files to bin directories
-    move_files_to_partitions(partitions)
+    merge_files_into_partitions(partitions)
     print("Files organized into partition folders")
 
 
