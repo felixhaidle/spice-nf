@@ -30,7 +30,7 @@ process LIBRARY_RESTRUCTURE {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        python: \$(python --version | awk '{print \$2}'))
+        python: \$(python --version | awk '{print \$2}')
     END_VERSIONS
     """
 

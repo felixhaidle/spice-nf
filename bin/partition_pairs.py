@@ -134,6 +134,14 @@ def main():
     pair_files = split_gene_files(gene_files)
     print(f"Split into {len(pair_files)} individual pairing files")
 
+    # Adjust partition number if too many partitions requested
+    total_pairs = len(pair_files)
+    if split_partitions_number > total_pairs:
+        print(f"Warning: Requested {split_partitions_number} partitions, but only {total_pairs} pairs available.")
+        split_partitions_number = total_pairs
+        print(f"Adjusting to {split_partitions_number} partitions.")
+
+
     # Step 3–4: Score each pair using protein path counts
     scored_pairs = score_pairs(pair_files, path_counts)
     print(f"Scored {len(scored_pairs)} pairing files")
