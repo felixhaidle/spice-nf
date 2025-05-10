@@ -37,7 +37,12 @@ from Classes.SequenceHandling.GeneAssembler import GeneAssembler
 from Classes.SequenceHandling.LibraryInfo import LibraryInfo
 from Classes.PassPath.PassPath import PassPath
 
-def calculate_implicit_fas_scores(gene_assembler: GeneAssembler, library_info: LibraryInfo, pass_path: PassPath):
+def calculate_implicit_fas_scores(
+    gene_assembler: GeneAssembler,
+    library_info: LibraryInfo,
+    pass_path: PassPath,
+    force_gene_ids_str: str = ""
+    ):
     """
     Step 5: Calculate implicit FAS scores for all genes.
 
@@ -48,14 +53,23 @@ def calculate_implicit_fas_scores(gene_assembler: GeneAssembler, library_info: L
         gene_assembler (GeneAssembler): Contains all loaded gene data.
         library_info (LibraryInfo): Stores metadata and processing status.
         pass_path (PassPath): File paths used for saving results.
+        force_gene_ids_str (str, optional): Comma-separated gene IDs to force FAS score to 1.
     """
+    # Convert comma-separated string to a set of IDs
+    force_gene_ids = set(gene_id.strip() for gene_id in force_gene_ids_str.split(",") if gene_id.strip())
+
     gene_list = gene_assembler.get_genes()
+
     for gene in tqdm(gene_list, ncols=100, total=len(gene_list), desc="Implicit FAS score collection progress"):
-        gene.calculate_implicit_fas_scores()
+        if gene.get_id() in force_gene_ids:
+            gene.force_set_implicit_fas_score()
+        else:
+            gene.calculate_implicit_fas_scores()
 
     gene_assembler.save_fas(pass_path)
     library_info["status"]["05_implicit_fas_scoring"] = True
     library_info.save()
+
 
 
 def generate_fasta_file(gene_assembler: GeneAssembler, library_info: LibraryInfo, pass_path: PassPath):
@@ -146,6 +160,9 @@ def main():
     )
     parser.add_argument('--library_dir', type=str, required=True,
                         help='Root directory of the gene library containing paths.json and info.yaml.')
+    parser.add_argument('--force_gene_ids', type=str, default="",
+                    help='Comma-separated list of gene IDs to force implicit FAS score to 1.')
+
 
     args = parser.parse_args()
 
@@ -175,7 +192,7 @@ def main():
     gene_assembler.load(pass_path)
 
     # Pipeline steps
-    calculate_implicit_fas_scores(gene_assembler, library_info, pass_path)
+    calculate_implicit_fas_scores(gene_assembler, library_info, pass_path, args.force_gene_ids)
     generate_fasta_file(gene_assembler, library_info, pass_path)
     generate_pairings(gene_assembler, library_info, pass_path)
     generate_ids_tsv(gene_assembler, library_info, pass_path)

@@ -95,7 +95,6 @@ def get_id_taxon(species: str) -> str:
     decoded: List[Dict[str, Any]] = r.json()
     return decoded[0]["species_taxonomy_id"]
 
-
 def get_species_info(raw_species: str) -> dict:
     r = requests.get(f"https://rest.ensembl.org/info/genomes/{raw_species}?",
                      headers={"Content-Type": "application/json"})
@@ -110,36 +109,57 @@ def get_species_info(raw_species: str) -> dict:
         "division": decoded["division"]
     }
 
-def resolve_ensembl_current_filename(base_url: str, file_type: str = "gtf") -> Tuple[str, str]:
+def resolve_ensembl_current_filename(
+    base_url: str,
+    file_type: str = "gtf",
+    url_species_name: str = "",
+    assembly_name: str = ""
+) -> Tuple[str, str]:
     """
-    Retrieve the latest filename from an Ensembl 'current' FTP folder, and extract its release version.
-
-    Returns:
-        (filename, release_version)
+    Retrieve the latest valid filename from an Ensembl 'current' FTP folder, and extract its release version.
     """
     try:
-        with request.urlopen(base_url) as response:
+        req = request.Request(base_url, headers={"User-Agent": "Mozilla/5.0"})
+        with request.urlopen(req) as response:
             html = response.read().decode("utf-8")
 
             if file_type == "gtf":
                 pattern = re.compile(r'href="([^"]+\.gtf\.gz)"')
+                matches = [
+                    m for m in pattern.findall(html)
+                    if m.startswith(f"{url_species_name}.{assembly_name}")
+                    and not any(x in m for x in ["abinitio", "chr"])
+                ]
             elif file_type == "pep":
                 pattern = re.compile(r'href="([^"]+\.pep\.all\.fa\.gz)"')
+                matches = [
+                    m for m in pattern.findall(html)
+                    if m.startswith(f"{url_species_name}.{assembly_name}")
+                    and "abinitio" not in m
+                ]
             else:
                 raise ValueError(f"Unsupported file type: {file_type}")
 
-            matches = pattern.findall(html)
-            if matches:
-                filename = matches[0]
-                # Try to extract version number from filename like: .NN.gtf.gz
-                version_match = re.search(r'\.(\d+)\.gtf\.gz', filename)
-                version = version_match.group(1) if version_match else "unknown"
-                return filename, version
+            if not matches:
+                raise Exception(f"No .{file_type} files found at {base_url}")
+
+            # Sort to prefer latest numeric release
+            def extract_release(filename: str) -> int:
+                match = re.search(r'\.(\d+)\.', filename)
+                return int(match.group(1)) if match else 0
+
+            matches.sort(key=extract_release, reverse=True)
+            filename = matches[0]
+
+            release_match = re.search(r'\.(\d+)\.', filename)
+            release = release_match.group(1) if release_match else "unknown"
+
+            return filename, release
 
     except (HTTPError, URLError) as e:
         raise Exception(f"Could not resolve latest file from {base_url}: {e}")
 
-    raise Exception(f"No .{file_type} file found at {base_url}")
+
 
 
 

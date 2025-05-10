@@ -9,6 +9,7 @@ process SEED_PARALLELIZATION {
     path complexity_txt
     path spice_library
     val available_cpus
+    val exclude_genes
 
     output:
     path 'partition_*'          , emit: partition_ch
@@ -33,7 +34,8 @@ process SEED_PARALLELIZATION {
         --pairings_json ${spice_library}/transcript_data/transcript_pairings.json\
         --paths_file ${complexity_txt}\
         --tmp_dir protein_pairings \
-        --partitions ${available_cpus}
+        --partitions ${available_cpus} \
+        --exclude_gene_ids "${exclude_genes}" \
 
 
     cat <<-END_VERSIONS > versions.yml

@@ -15,8 +15,8 @@ flowchart TB
     %% Parameters %%
     subgraph PARAMETERS
     species[species]
-    release[release]
     anno_tools[anno_tools]
+    fas_partitions[fas_partitions]
     outdir[outdir]
 
 
@@ -25,42 +25,46 @@ flowchart TB
 
     %% Processes %%
     subgraph PIPELINE
-        SEQUENCES[SEQUENCES]
-        TOOLS[TOOLS]
+        SEQUENCES[ENSEMBL_DOWNLOAD]
         LIBRARY_INITIALIZATION[LIBRARY_INITIALIZATION]
         FAS_ANNOTATION[FAS_ANNOTATION]
         LIBRARY_RESTRUCTURE[LIBRARY_RESTRUCTURE]
         FAS_SCORING[FAS_SCORING]
         CONCAT_FAS_SCORES[CONCAT_FAS_SCORES]
         COMPLEXITY[COMPLEXITY]
+        SEED_PARALLELIZATION[SEED_PARALLELIZATION]
     end
 
     %% Outputs %%
     subgraph OUTPUTS
-        library[library]
+        library[spice_library]
     end
 
     %% Connections %%
     species --> SEQUENCES
     SEQUENCES --> LIBRARY_INITIALIZATION
 
-    species --> LIBRARY_INITIALIZATION
-    release --> LIBRARY_INITIALIZATION
-    release --> SEQUENCES
 
-    anno_tools --> TOOLS
 
-    TOOLS --> FAS_ANNOTATION
-    TOOLS --> LIBRARY_INITIALIZATION
+    anno_tools --> FAS_ANNOTATION
+
+
 
     LIBRARY_INITIALIZATION --> FAS_ANNOTATION
+
+
+
+
     FAS_ANNOTATION --> LIBRARY_RESTRUCTURE
 
     LIBRARY_RESTRUCTURE --> COMPLEXITY
-    LIBRARY_RESTRUCTURE --> CONCAT_FAS_SCORES
 
 
-    COMPLEXITY --> FAS_SCORING
+    COMPLEXITY --> SEED_PARALLELIZATION
+
+    fas_partitions --> SEED_PARALLELIZATION
+
+    SEED_PARALLELIZATION --> FAS_SCORING
 
     FAS_SCORING --> CONCAT_FAS_SCORES
     outdir --> CONCAT_FAS_SCORES
@@ -72,13 +76,15 @@ It is roughly divided into the following steps:
 
 The pipeline is roughly divided into the following steps:
 
-- Download peptide sequences and annotation files from [ENSEMBL](https://www.ensembl.org/index.html) for the target organism.
-- Initialize the SPICE library structure and fetch species metadata from [ENSEMBL](https://www.ensembl.org/index.html).
+- Download peptide sequences and annotation files and fetch species metadata from [ENSEMBL](https://www.ensembl.org/index.html) for the target organism.
+- Initialize the SPICE library structure [ENSEMBL](https://www.ensembl.org/index.html).
 - Annotate the peptide sequences using [fas.doAnno](https://doi.org/10.1093/bioinformatics/btad226).
 - Restructure the annotated sequences in preparation for FAS scoring.
-- Order FAS scoring by estimating run time for each gene by using [fas.calcComplexity](https://doi.org/10.1093/bioinformatics/btad226).
+- Order FAS scoring by estimating run time for each protein pairing by using [fas.calcComplexity](https://doi.org/10.1093/bioinformatics/btad226).
+- Group protein pairings into a user specified amount of partitions to reduce the amount of processes (optional).
 - Perform FAS scoring using [fas.run](https://doi.org/10.1093/bioinformatics/btad226).
 - Merge the resulting FAS scores into the final library structure.
+- Emit the created library in to the target directory
 
 ## Usage
 
@@ -102,63 +108,56 @@ fas.doAnno -i test_annofas.fa -o test_output
 
 ### Set up the pipeline
 
-As this pipeline is not part of nf-core, you first need to clone the repository:
-
-```bash
-git clone git@github.com:felixhaidle/spice-nf.git
-```
-
-After cloning, you should test the functionality using the test profile.
-
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) for instructions on setting up Nextflow.
 > Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) using `-profile test` before running the workflow on actual data.
+
+You should test the functionality using the test profile.
 
 > [!WARNING]
 > This pipeline currently only supports the "conda" profile. The environment requirements are defined in `assets/environment.yml`. All processes use the same environment.
 
 ```bash
-nextflow run BIONF/spice_library_pipeline \
-   -profile conda,test \
-   --outdir <OUTDIR>
+nextflow run git@github.com:felixhaidle/spice-nf.git \
+  -r <DESIRED_RELEASE>
+  -profile conda,test \
+  --outdir <OUTDIR>
 ```
 
 ### Run the full pipeline:
 
 ```bash
-nextflow run BIONF/spice_library_pipeline \
-   -profile conda \
-   --species <SPECIES> \
-   --release <ENSEMBL_RELEASE_VERSION> \
-   --anno_tools <PATH_TO_ANNOTOOLS_INSTALLATION> \
-   --outdir <OUTDIR>
+nextflow run git@github.com:felixhaidle/spice-nf.git \
+  -r <DESIRED_RELEASE>
+  -profile conda \
+  --species <SPECIES> \
+  --anno_tools <PATH_TO_ANNOTOOLS_INSTALLATION> \
+  --outdir <OUTDIR> \
+  --fas_partitions <AVAILABLE_CPUS>
 ```
 
-| Parameter        | Description                                                                                                                                                                      |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `-profile conda` | Specifies the execution profile (only `conda` is supported).                                                                                                                     |
-| `--species`      | Species name (e.g., `homo_sapiens`, `mus_musculus`). Must match ENSEMBL naming.                                                                                                  |
-| `--release`      | ENSEMBL release version (e.g., `113`). Used to fetch annotation data. It is recommended to use the latest version. Please refer to [ENSEMBL](https://www.ensembl.org/index.html) |
-| `--anno_tools`   | Path to the installed annotation tools directory (equivalent to the `-t` parameter in `fas.setup`).                                                                              |
-| `--outdir`       | Output directory for pipeline results. Will be created if it doesn't exist.                                                                                                      |
+| Parameter          | Description                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `-r`               | specifies the pipeline version                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `-profile conda`   | Specifies the execution profile (only `conda` is supported).                                                                                                                                                                                                                                                                                                                                                                            |
+| `--species`        | Species name (e.g., `homo_sapiens`, `mus_musculus`). Must match ENSEMBL naming.                                                                                                                                                                                                                                                                                                                                                         |
+| `--anno_tools`     | Path to the installed annotation tools directory (equivalent to the `-t` parameter in `fas.setup`).                                                                                                                                                                                                                                                                                                                                     |
+| `--outdir`         | Output directory for pipeline results. Will be created if it doesn't exist.                                                                                                                                                                                                                                                                                                                                                             |
+| `--fas_partitions` | Amount of parallel fas scoring processes you can run in parallel. Will group the protein pairs into this amout of processes. Higher amount means more parallel scoring, but if the processes can't run in parallel the benefits diminishes. This parameter is optional buth highly highly highly recommended to be spcified since otherweise for each protein pairing a process will be created, which significantly increases runtime. |
 
-A full overview of all available parameters can be found in [`parameters.md`](docs/parameters.md).
+A full overview of all available parameters can be found in [`parameters.md`](docs/parameters.md). Check it out before you run the pipeline.
 
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or the Nextflow `-params-file` option.
 > Custom config files (via the `-c` option) can be used for configuration **except for parameters**; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).
 
-A full list of available parameters and documentation can also be found in the **Wiki**.
+A full list of available parameters and documentation can also be found in the **[WIKI](https://github.com/felixhaidle/spice-nf/wiki)**.
 
 ## Credits
 
 `BIONF/spice_library_pipeline` was originally written by **Felix Haidle**.
 
-We thank the following people for their extensive assistance in the development of this pipeline:
-
 [Become a contributor](https://github.com/felixhaidle/spice-nf/wiki/06-Contributing)
-
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
 
 ## AI Assistance Acknowledgment
 

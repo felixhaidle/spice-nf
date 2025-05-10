@@ -183,6 +183,31 @@ class TestLocalEnsembl(unittest.TestCase):
         self.assertIn("/gtf/arabidopsis_thaliana/", gtf_url)
         self.assertRegex(gtf_url, r"Arabidopsis_thaliana\.TAIR10\.\d+\.gtf\.gz")
 
+    @patch("Classes.API.ensembl_mod.EnsemblUtils.get_species_info")
+    @patch("Classes.API.ensembl_mod.EnsemblUtils.get_id_taxon")
+    def test_latest_human_gtf_url(self, mock_get_taxon, mock_get_species_info):
+        mock_get_species_info.return_value = {
+            "name": "Homo sapiens",
+            "url_name": "homo_sapiens",
+            "assembly_default": "GRCh38",
+            "division": "Ensembl"
+        }
+        mock_get_taxon.return_value = "9606"
+
+        le = LocalEnsembl(
+            raw_species="homo_sapiens",
+            goal_directory="/tmp",
+            release=-1,
+            metadata_mode="auto"
+        )
+
+        gtf_url = le.ftp_address
+
+        self.assertIn("ensembl.org/pub/current_gtf/homo_sapiens/", gtf_url)
+        self.assertRegex(gtf_url, r"Homo_sapiens\.GRCh38\.\d+\.gtf\.gz$")
+
+
+
 
 
 if __name__ == "__main__":

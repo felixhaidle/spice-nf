@@ -96,10 +96,42 @@ def main(batch_dir, output_base):
     reverse_file = os.path.join(batch_dir, "merged_reverse.domains")
     phyloprofile_file = os.path.join(batch_dir, "merged.phyloprofile")
 
-    # Process each file individually
+    all_genes = set()
+
+    # Collect gene IDs from all files
+    for file in [forward_file, reverse_file, phyloprofile_file]:
+        with open(file) as f:
+            next(f)  # skip header
+            for line in f:
+                if not line.strip():
+                    continue
+                if "phyloprofile" in file:
+                    gene = extract_gene_id(line.split("\t")[0])
+                    all_genes.add(gene)
+                else:
+                    prot1, prot2 = line.split("\t")[0].split("#")
+                    all_genes.update([extract_gene_id(prot1), extract_gene_id(prot2)])
+
+    # Process actual data
     process_domains_low_memory(forward_file, output_base, direction="forward")
     process_domains_low_memory(reverse_file, output_base, direction="reverse")
     process_phyloprofile_low_memory(phyloprofile_file, output_base)
+
+    # Ensure forward/reverse files exist for all genes
+    with open(forward_file) as f:
+        forward_header = next(f)
+    with open(reverse_file) as f:
+        reverse_header = next(f)
+
+    for gene in all_genes:
+        for direction, header in [("forward", forward_header), ("reverse", reverse_header)]:
+            gene_dir = os.path.join(output_base, gene)
+            os.makedirs(gene_dir, exist_ok=True)
+            file_path = os.path.join(gene_dir, f"{gene}_{direction}.domains")
+            if not os.path.exists(file_path):
+                with open(file_path, "w") as f:
+                    f.write(header)
+
 
 if __name__ == "__main__":
     # Command-line argument parsing

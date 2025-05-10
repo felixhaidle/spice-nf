@@ -5,22 +5,28 @@ import argparse
 import json
 import shutil
 
-def load_path_counts(path_count_file):
-    """Load protein path counts from a TSV file"""
+def load_path_counts(path_count_file, column_name="approximate greedy complexity"):
+    """Load protein scores from a TSV file based on a named column"""
     path_counts = {}
     with open(path_count_file, "r") as f:
-        next(f)
+        header = next(f).strip().split("\t")
+        try:
+            col_idx = header.index(column_name)
+        except ValueError:
+            raise ValueError(f"Column '{column_name}' not found in header of {path_count_file}")
+
         for line in f:
             parts = line.strip().split("\t")
-            if len(parts) >= 2:
+            if len(parts) > col_idx:
                 try:
-                    path_counts[parts[0]] = int(parts[1])
+                    path_counts[parts[0]] = float(parts[col_idx])  # or int if values are integers
                 except ValueError:
                     continue
     return path_counts
 
 
-def unpack_genes(pairings_json_path, out_dir):
+
+def unpack_genes(pairings_json_path, out_dir, excluded_genes):
     """Unpack all genes into individual TSV files"""
     os.makedirs(out_dir, exist_ok=True)
 
@@ -33,11 +39,14 @@ def unpack_genes(pairings_json_path, out_dir):
     for gene_id, data in json_data.items():
         if gene_id in skip_keys or not isinstance(data, str):
             continue
+        if gene_id in excluded_genes:
+            continue
 
         gene_path = os.path.join(out_dir, f"{gene_id}.tsv")
         with open(gene_path, "w") as f_out:
             f_out.write(data)
         gene_files.append(gene_path)
+
 
     return gene_files
 
@@ -115,6 +124,11 @@ def main():
     parser.add_argument("--paths_file", required=True, help="Protein path complexity file")
     parser.add_argument("--tmp_dir", default="unpacked_genes", help="Temporary dir for unpacked gene .tsv files")
     parser.add_argument("--partitions", type=int, default=8, help="Number of CPU partitions")
+    parser.add_argument(
+    "--exclude_gene_ids", type=str, default="",
+    help="Comma-separated list of gene IDs to exclude from unpacking and partitioning"
+)
+
 
     args = parser.parse_args()
 
@@ -128,7 +142,9 @@ def main():
     print(f"Loaded {len(path_counts)} protein path scores")
 
     # Step 1–2: Unpack genes and split to protein pair .tsv files
-    gene_files = unpack_genes(args.pairings_json, args.tmp_dir)
+    excluded_gene_list = args.exclude_gene_ids.split(",") if args.exclude_gene_ids else []
+    gene_files = unpack_genes(args.pairings_json, args.tmp_dir, excluded_gene_list)
+
     print(f"Unpacked {len(gene_files)} genes")
 
     pair_files = split_gene_files(gene_files)

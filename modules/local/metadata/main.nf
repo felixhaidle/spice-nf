@@ -7,6 +7,7 @@ process METADATA {
     input:
     val species
     val is_ensembl
+    val taxonomy_id
 
     output:
     env('SPECIES_NAME')           , emit: species_name
@@ -21,6 +22,8 @@ process METADATA {
     script:
     def args = task.ext.args ?: ''
     def flag = is_ensembl ? "" : "--use_placeholder"
+    def set_taxon = taxonomy_id ? "TAXON_ID=${taxonomy_id}" : ""
+
 
 
     """
@@ -29,6 +32,7 @@ process METADATA {
     export TAXON_ID
     export RELEASE
 
+    ${set_taxon}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

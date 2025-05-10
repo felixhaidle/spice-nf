@@ -74,7 +74,8 @@ workflow SPICE_LIBRARY_PIPELINE {
         } else {
             metadata_ch = METADATA(
                 species,
-                params.is_ensembl
+                params.is_ensembl,
+                params.taxonomy_id
             )
 
             ch_versions = ch_versions.mix(METADATA.out.versions)
@@ -128,7 +129,8 @@ workflow SPICE_LIBRARY_PIPELINE {
             metadata_ch.release,
             prefixes,
             anno_tools_ch,
-            metadata_ch.taxon_id
+            metadata_ch.taxon_id,
+            params.exclude_genes
         )
         ch_versions = ch_versions.mix(LIBRARY_INITIALIZATION.out.versions)
 
@@ -159,12 +161,12 @@ workflow SPICE_LIBRARY_PIPELINE {
             create_library.genes_txt_ch,
             complexity_ch.complexity,
             domain_importance_library.domain_importance_library_ch,
-            params.fas_partitions
+            params.fas_partitions,
+            params.exclude_genes
         )
         ch_versions = ch_versions.mix(SEED_PARALLELIZATION.out.versions)
 
-        protein_pairs.protein_pairings_ch.view()
-        protein_pairs.partition_ch.view()
+
 
         if (params.fas_partitions > 0) {
             input_fas = protein_pairs.partition_ch.flatten()
@@ -172,7 +174,6 @@ workflow SPICE_LIBRARY_PIPELINE {
             input_fas = protein_pairs.protein_pairings_ch.flatten()
         }
 
-        input_fas.view()
 
         fas_scores = FAS_SCORING(
             input_fas,

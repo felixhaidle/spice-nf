@@ -110,27 +110,37 @@ class LocalEnsembl:
         if self.release != -1:
             release_folder = f"release-{self.release}"
             release_number = self.release
-        else:
-            release_folder = "current" if self.division != "Ensembl" else f"current_{file_type}"
 
             if file_type == "gtf":
-                folder_url = f"{base}{release_folder}/gtf/{file_name_species}/"
+                return f"{base}{release_folder}/gtf/{file_name_species}/{self.url_species_name}.{self.assembly_default_species_name}.{release_number}.gtf.gz"
             elif file_type == "pep":
-                folder_url = f"{base}{release_folder}/fasta/{file_name_species}/pep/"
+                return f"{base}{release_folder}/fasta/{file_name_species}/pep/{self.url_species_name}.{self.assembly_default_species_name}.pep.all.fa.gz"
             else:
                 raise ValueError("Invalid file_type (must be 'gtf' or 'pep')")
+        else:
+            if self.division in ("Ensembl", "EnsemblVertebrates"):
+                if file_type == "gtf":
+                    folder_url = f"{base}current_gtf/{file_name_species}/"
+                elif file_type == "pep":
+                    folder_url = f"{base}current_fasta/{file_name_species}/pep/"
+                else:
+                    raise ValueError("Invalid file_type (must be 'gtf' or 'pep')")
+            else:
+                # ✅ Correct folder paths for EnsemblGenomes divisions
+                if file_type == "gtf":
+                    folder_url = f"{base}current/gtf/{file_name_species}/"
+                elif file_type == "pep":
+                    folder_url = f"{base}current/fasta/{file_name_species}/pep/"
+                else:
+                    raise ValueError("Invalid file_type (must be 'gtf' or 'pep')")
 
-            resolved_filename, resolved_release = resolve_ensembl_current_filename(folder_url, file_type)
-            self.release = resolved_release  # Update the object’s release
+            resolved_filename, resolved_release = resolve_ensembl_current_filename(
+                folder_url, file_type, self.url_species_name, self.assembly_default_species_name
+            )
+
+            self.release = resolved_release
             return f"{folder_url}{resolved_filename}"
 
-        # Construct URLs for explicit release
-        if file_type == "gtf":
-            return f"{base}{release_folder}/gtf/{file_name_species}/{self.url_species_name}.{self.assembly_default_species_name}.{release_number}.gtf.gz"
-        elif file_type == "pep":
-            return f"{base}{release_folder}/fasta/{file_name_species}/pep/{self.url_species_name}.{self.assembly_default_species_name}.pep.all.fa.gz"
-        else:
-            raise ValueError("Invalid file_type (must be 'gtf' or 'pep')")
 
 
 

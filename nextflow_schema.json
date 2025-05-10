@@ -28,7 +28,7 @@
                 },
                 "release": {
                     "type": "number",
-                    "default": -1.0,
+                    "default": -1,
                     "description": "Ensembl genome release version (e.g., 113). Default will automatically retrieve the latest release from the appropriate Ensembl server.",
                     "help_text": "If null, the latest release will be fetched automatically. Note: Ensembl and Ensembl Genomes (Plants, Fungi, Metazoa) use different release numbers. Please refer to the Ensembl FTP or REST API for the correct version.",
                     "minimum": -1,
@@ -70,6 +70,14 @@
                     "type": "integer",
                     "default": 0,
                     "description": "Number of partitions for the FAS scoring. Fas scoring will be split up into this amount of partitions to reduce the makespan. Make sure that you can run this amount of processes in parallel. Default is 0 (no pre-partitioning, will submit each fas scoring as a sepearte process, not recommended)."
+                },
+                "exclude_genes": {
+                    "type": "string",
+                    "description": "Comma-separated list of gene IDs to exclude from the FAS scoring similarities for this gene will be set to 1 and only a DET expression will be performed. Example: 'gene1,gene2,gene3'."
+                },
+                "taxonomy_id": {
+                    "type": "string",
+                    "description": "In case \"is_ensembl\" is set to false, this parameter can be used to set a taxonomy, alternatively a  placeholder will be used"
                 }
             }
         },

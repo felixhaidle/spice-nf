@@ -14,6 +14,7 @@ process LIBRARY_INITIALIZATION {
     path prefixes
     path anno_tools
     val taxon_id
+    val exclude_genes
 
     output:
     path 'spice_lib_*'                          , emit: library_dir
@@ -44,7 +45,8 @@ process LIBRARY_INITIALIZATION {
     --taxon_prefixes "${prefixes}"
 
     finish_setup.py \
-    --library_dir spice_lib_*
+    --library_dir spice_lib_* \
+    --force_gene_ids "${exclude_genes}"
 
 
     cat <<-END_VERSIONS > versions.yml

@@ -281,6 +281,17 @@ class Gene:
         if item in key_list:
             return self.attributes[item]
 
+    def force_set_implicit_fas_score(self, score: float = 1.0) -> None:
+        """
+        Force set all FAS scores between transcripts to a specific value.
+        """
+        transcript_ids = list(self.fas_dict.keys())
+        for id1 in transcript_ids:
+            for id2 in transcript_ids:
+                self.fas_dict[id1][id2] = score
+        self.check_fas_status()
+
+
     @property
     def attributes(self) -> Dict[str, Any]:
         output_dict: Dict[str, Any] = {"_id": self.get_id(),
@@ -293,6 +304,7 @@ class Gene:
                                        "transcripts": self.get_transcripts(),
                                        "proteins": self.get_proteins()}
         return output_dict
+
 
     @property
     def fasta(self) -> str:
