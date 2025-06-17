@@ -1,7 +1,0 @@
-#linearized
-Pfam
-#normal
-SEG
-SignalP
-TMHMM
-#checked

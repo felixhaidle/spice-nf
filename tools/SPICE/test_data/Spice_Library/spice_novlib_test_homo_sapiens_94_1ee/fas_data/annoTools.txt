@@ -1,9 +1,0 @@
-#linearized
-Pfam
-#normal
-fLPS
-COILS2
-SEG
-SignalP
-TMHMM
-#checked
