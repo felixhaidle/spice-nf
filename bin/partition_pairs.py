@@ -19,10 +19,12 @@ def load_path_counts(path_count_file, column_name="approximate greedy complexity
             parts = line.strip().split("\t")
             if len(parts) > col_idx:
                 try:
-                    path_counts[parts[0]] = float(parts[col_idx])  # or int if values are integers
+                    raw_score = int(parts[col_idx])
+                    path_counts[parts[0]] = raw_score + 1 # +1 one so not all zero scored proteins get assinged to the same partition
                 except ValueError:
                     continue
     return path_counts
+
 
 
 
