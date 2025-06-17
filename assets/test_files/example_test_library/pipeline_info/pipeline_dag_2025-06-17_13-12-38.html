@@ -1,0 +1,110 @@
+<!--
+  ~ Copyright 2013-2024, Seqera Labs
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<html>
+<head>
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+</head>
+<body>
+<pre class="mermaid" style="text-align: center;">
+flowchart TB
+    subgraph " "
+    v7["species"]
+    v8["is_ensembl"]
+    v9["taxonomy_id"]
+    v12["Channel.fromPath"]
+    v13["Channel.fromPath"]
+    v14["Channel.fromPath"]
+    v17["Channel.fromPath"]
+    v18["exclude_genes"]
+    v21["anno_tools"]
+    v28["available_cpus"]
+    v29["exclude_genes"]
+    v34["anno_tools"]
+    v40["outdir"]
+    v47["Channel.of"]
+    end
+    subgraph BIONF_SPICE_LIBRARY_PIPELINE
+    subgraph SPICE_LIBRARY_PIPELINE
+    v10([METADATA])
+    v19([LIBRARY_INITIALIZATION])
+    v22([FAS_ANNOTATION])
+    v24([LIBRARY_RESTRUCTURE])
+    v26([COMPLEXITY])
+    v30([SEED_PARALLELIZATION])
+    v35([FAS_SCORING])
+    v38([CONCAT_PROTEIN_PAIRS])
+    v41([CONCAT_GENES])
+    v11(( ))
+    v33(( ))
+    v37(( ))
+    end
+    end
+    subgraph " "
+    v31[" "]
+    v42["library"]
+    v50["ch_collated_versions"]
+    end
+    v7 --> v10
+    v8 --> v10
+    v9 --> v10
+    v10 --> v19
+    v10 --> v11
+    v12 --> v19
+    v13 --> v19
+    v14 --> v19
+    v17 --> v19
+    v17 --> v22
+    v17 --> v26
+    v18 --> v19
+    v19 --> v22
+    v19 --> v30
+    v19 --> v38
+    v19 --> v11
+    v21 --> v22
+    v22 --> v24
+    v22 --> v11
+    v24 --> v26
+    v24 --> v30
+    v24 --> v35
+    v24 --> v41
+    v24 --> v11
+    v26 --> v30
+    v26 --> v11
+    v28 --> v30
+    v29 --> v30
+    v30 --> v31
+    v30 --> v11
+    v30 --> v33
+    v34 --> v35
+    v33 --> v35
+    v35 --> v11
+    v35 --> v37
+    v37 --> v38
+    v38 --> v41
+    v38 --> v11
+    v40 --> v41
+    v41 --> v42
+    v41 --> v11
+    v47 --> v11
+    v11 --> v50
+
+</pre>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true, maxTextSize: Number.MAX_SAFE_INTEGER, maxEdges: Number.MAX_SAFE_INTEGER });
+</script>
+</body>
+</html>
