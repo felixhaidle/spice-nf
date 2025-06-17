@@ -22,7 +22,8 @@ process METADATA {
     script:
     def args = task.ext.args ?: ''
     def flag = is_ensembl ? "" : "--use_placeholder"
-    def set_taxon = taxonomy_id ? "TAXON_ID=${taxonomy_id}" : ""
+    //def set_taxon = taxonomy_id ? "TAXON_ID=${taxonomy_id}" : ""
+    def set_taxon = taxonomy_id != '' ? "export TAXON_ID=${taxonomy_id}" : ""
 
 
 
