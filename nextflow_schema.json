@@ -76,7 +76,7 @@
                     "description": "Comma-separated list of gene IDs to exclude from the FAS scoring similarities for this gene will be set to 1 and only a DET expression will be performed. Example: 'gene1,gene2,gene3'."
                 },
                 "taxonomy_id": {
-                    "type": "string",
+                    "type": "integer",
                     "description": "In case \"is_ensembl\" is set to false, this parameter can be used to set a taxonomy, alternatively a  placeholder will be used"
                 }
             }
