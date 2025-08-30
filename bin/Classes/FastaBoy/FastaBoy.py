@@ -203,9 +203,10 @@ class EnsemblFastaBoy:
             elif entry.startswith("transcript:"):
                 fasta_header_dict["transcript_id"] = entry.split(":")[1].split(".")[0]
             elif entry.startswith("gene_biotype:"):
-                fasta_header_dict["gene_biotype"] = entry.split(":")[1]
+                fasta_header_dict["gene_biotype"] = entry.split(":")[1].strip()
             elif entry.startswith("transcript_biotype:"):
-                fasta_header_dict["transcript_biotype"] = entry.split(":")[1]
+                fasta_header_dict["transcript_biotype"] = entry.split(":")[1].strip()
+
         return fasta_header_dict
 
     @staticmethod
